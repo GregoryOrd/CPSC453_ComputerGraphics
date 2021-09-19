@@ -9,8 +9,8 @@ class A_RecursiveShapeScene {
 public:
 	A_RecursiveShapeScene(std::vector<Point>& initialShape, int minIterations, int maxIterations);
 
-	size_t numVertices();
-	std::vector<Point> vertices();
+	size_t numVertices() const;
+	std::vector<Point> vertices() const;
 	bool incrementIterations();
 	bool decrementIterations();
 

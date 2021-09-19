@@ -9,27 +9,31 @@
 #include "Window.h"
 #include "SerpinskyTriangle.h"
 #include "SerpinskyCallbacks.h"
+#include "InitialShapeDefs.h"
+#include "A_RecursiveShapeScene.h"
 
 int main() {
+	//Init
 	Log::debug("Starting main");
 	glfwInit();
 	Window window(800, 800, "Serpinksy Triangle and Menger Sponge");
 	GLDebug::enable();
 	ShaderProgram shader("shaders/test.vert", "shaders/test.frag");
+	int currentSceneNumber = 0;
 
-	// Defing intial  serpinsky triangle
-	std::vector<Point> originalTrianglePositions = {
-		Point(-0.5f, -0.5f, 0.f),
-		Point(0.5f, -0.5f, 0.f),
-		Point(0.f, 0.5f, 0.f)
-	};
-
-	//Initialize the SerpinskyTriangle and GPU_Geometry data structures
-	SerpinskyTriangle serpinskyTriangle(originalTrianglePositions, 0, 10);
+	//Declare GPU Geometry Object
 	GPU_Geometry gpuGeom;
 
-	//Setup Keyboard Callbacks to increment/decrement number of serpinksy iterations
-	window.setCallbacks(std::make_shared<SerpinskyCallbacks>(serpinskyTriangle, gpuGeom));
+	//Initialize the shapes for each scene
+	std::vector<A_RecursiveShapeScene*> sceneShapes;
+	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
+	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
+	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
+	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
+
+	//Setup Keyboard Callbacks to switch between scenes and
+	//increment/decrement number of iterations in a scene
+	window.setCallbacks(std::make_shared<SerpinskyCallbacks>(sceneShapes, gpuGeom, &currentSceneNumber));
 
 	// RENDER LOOP
 	while (!window.shouldClose()) {
@@ -40,10 +44,16 @@ int main() {
 
 		glEnable(GL_FRAMEBUFFER_SRGB);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDrawArrays(GL_TRIANGLES, 0, GLsizei(serpinskyTriangle.numVertices()));
+		glDrawArrays(GL_TRIANGLES, 0, GLsizei(sceneShapes.at(currentSceneNumber)->numVertices()));
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
 		window.swapBuffers();
+	}
+
+	// Cleanup the scene shape pointers
+	while (sceneShapes.size() > 0)
+	{
+		sceneShapes.pop_back();
 	}
 
 	glfwTerminate();

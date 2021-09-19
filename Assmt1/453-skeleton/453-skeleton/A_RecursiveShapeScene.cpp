@@ -1,19 +1,19 @@
 #include "A_RecursiveShapeScene.h"
 
 A_RecursiveShapeScene::A_RecursiveShapeScene(std::vector<Point>& initialShape, int minIterations, int maxIterations)
-	: initialShape_(initialShape)
-	, currentIterations_(minIterations)
+	: currentIterations_(minIterations)
 	, minIterations_(minIterations)
 	, maxIterations_(maxIterations)
+	, initialShape_(initialShape)
 {
 }
 
-size_t A_RecursiveShapeScene::numVertices()
+size_t A_RecursiveShapeScene::numVertices() const
 {
 	return vertices_.size();
 }
 
-std::vector<Point> A_RecursiveShapeScene::vertices()
+std::vector<Point> A_RecursiveShapeScene::vertices() const
 {
 	return vertices_;
 }
