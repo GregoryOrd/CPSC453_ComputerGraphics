@@ -141,6 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+	<ClCompile Include="A_RecursiveShapeScene.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="main.cpp" />
 	<ClCompile Include="SerpinskyCallbacks.cpp" />
@@ -153,6 +154,7 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+	<ClInclude Include="A_RecursiveShapeScene.h" />
     <ClInclude Include="Geometry.h" />
 	<ClInclude Include="SerpinskyCallbacks.h" />
 	<ClCompile Include="SerpinskyGPUDrawer.h" />

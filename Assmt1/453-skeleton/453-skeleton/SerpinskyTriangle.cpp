@@ -1,19 +1,16 @@
 #include "SerpinskyTriangle.h"
 
-SerpinskyTriangle::SerpinskyTriangle(TrianglePositions& originalTriangle, int minIterations, int maxIterations)
-	: originalTriangle_(originalTriangle)
-	, currentIterations_(minIterations)
-	, minIterations_(minIterations)
-	, maxIterations_(maxIterations)
+SerpinskyTriangle::SerpinskyTriangle(std::vector<Point>& originalTriangle, int minIterations, int maxIterations)
+	: A_RecursiveShapeScene(originalTriangle, minIterations, maxIterations)
 {
-	findTrianglesRecursively(originalTriangle, minIterations);
+	findShapesRecursively(originalTriangle, minIterations);
 }
 
-void SerpinskyTriangle::findTrianglesRecursively(TrianglePositions& triangle, int iterations)
+void SerpinskyTriangle::findShapesRecursively(std::vector<Point>& triangle, int iterations)
 {
 	if (iterations == 0)
 	{
-		pushTriangleIntoSerpinksyVertices(triangle);
+		pushShapesIntoVertices(triangle);
 		return;
 	}
 
@@ -25,62 +22,28 @@ void SerpinskyTriangle::findTrianglesRecursively(TrianglePositions& triangle, in
 	Point cornerE = 0.5f * cornerB + 0.5f * cornerC;
 	Point cornerF = 0.5f * cornerC + 0.5f * cornerA;
 
-	TrianglePositions newTriangleA = { cornerD, cornerB, cornerE };
-	TrianglePositions newTriangleB = { cornerA, cornerD, cornerF };
-	TrianglePositions newTriangleC = { cornerF, cornerE, cornerC };
+	std::vector<Point> newTriangleA = { cornerD, cornerB, cornerE };
+	std::vector<Point> newTriangleB = { cornerA, cornerD, cornerF };
+	std::vector<Point> newTriangleC = { cornerF, cornerE, cornerC };
 
 	if (iterations > 1)
 	{
-		findTrianglesRecursively(newTriangleA, iterations - 1);
-		findTrianglesRecursively(newTriangleB, iterations - 1);
-		findTrianglesRecursively(newTriangleC, iterations - 1);
+		findShapesRecursively(newTriangleA, iterations - 1);
+		findShapesRecursively(newTriangleB, iterations - 1);
+		findShapesRecursively(newTriangleC, iterations - 1);
 	}
 	else
 	{
-		pushTriangleIntoSerpinksyVertices(newTriangleA);
-		pushTriangleIntoSerpinksyVertices(newTriangleB);
-		pushTriangleIntoSerpinksyVertices(newTriangleC);
+		pushShapesIntoVertices(newTriangleA);
+		pushShapesIntoVertices(newTriangleB);
+		pushShapesIntoVertices(newTriangleC);
 	}
 }
 
-void SerpinskyTriangle::pushTriangleIntoSerpinksyVertices(TrianglePositions& triangle)
+void SerpinskyTriangle::pushShapesIntoVertices(std::vector<Point>& triangle)
 {
 	for (int i = 0; i < 3; i++)
 	{
-		serpinksyVertices_.push_back(triangle[i]);
+		vertices_.push_back(triangle[i]);
 	}
-}
-
-size_t SerpinskyTriangle::numVertices()
-{
-	return serpinksyVertices_.size();
-}
-
-std::vector<Point> SerpinskyTriangle::serpinksyVertices()
-{
-	return serpinksyVertices_;
-}
-
-bool SerpinskyTriangle::incrementIterations()
-{
-	if (currentIterations_ < maxIterations_)
-	{
-		currentIterations_++;
-		serpinksyVertices_.clear();
-		findTrianglesRecursively(originalTriangle_, currentIterations_);
-		return true;
-	}
-	return false;
-}
-
-bool SerpinskyTriangle::decrementIterations()
-{
-	if (currentIterations_ > minIterations_)
-	{
-		currentIterations_--;
-		serpinksyVertices_.clear();
-		findTrianglesRecursively(originalTriangle_, currentIterations_);
-		return true;
-	}
-	return false;
 }

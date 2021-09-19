@@ -15,6 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+	<ClCompile Include="A_RecursiveShapeScene.cpp">
+	  <Filter>Source Files</Filter>
+	</ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -47,6 +50,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+	<ClInclude Include="A_RecursiveShapeScene.h">
+	  <Filter>Header Files</Filter>
+	</ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -10,19 +10,15 @@
 #include "SerpinskyTriangle.h"
 #include "SerpinskyCallbacks.h"
 
-typedef glm::vec3 Colour;
-typedef Colour TriangleVertexColours[3];
-
 int main() {
 	Log::debug("Starting main");
-	Log::info("This program starts with a standard triangle (aka 0 iterations). Use the up arrow key to increment or the down arrow key to decrement the number of iterations between 0 and 10.");
 	glfwInit();
 	Window window(800, 800, "Serpinksy Triangle and Menger Sponge");
 	GLDebug::enable();
 	ShaderProgram shader("shaders/test.vert", "shaders/test.frag");
 
-	// Defing intial triangle
-	TrianglePositions originalTrianglePositions = {
+	// Defing intial  serpinsky triangle
+	std::vector<Point> originalTrianglePositions = {
 		Point(-0.5f, -0.5f, 0.f),
 		Point(0.5f, -0.5f, 0.f),
 		Point(0.f, 0.5f, 0.f)

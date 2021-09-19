@@ -2,7 +2,7 @@
 
 SerpinskyCallbacks::SerpinskyCallbacks(SerpinskyTriangle& serpinskyTriangle, GPU_Geometry& gpuGeom)
 	: serpinskyTriangle_(serpinskyTriangle)
-	, gpuDrawer_(gpuGeom, serpinskyTriangle_.serpinksyVertices())
+	, gpuDrawer_(gpuGeom, serpinskyTriangle_.vertices())
 {
 }
 
@@ -18,6 +18,6 @@ void SerpinskyCallbacks::keyCallback(int key, int scancode, int action, int mods
 
 	if (triangleChanged)
 	{
-		gpuDrawer_.drawSerpinskyVertices(serpinskyTriangle_.serpinksyVertices());
+		gpuDrawer_.drawSerpinskyVertices(serpinskyTriangle_.vertices());
 	}
 }

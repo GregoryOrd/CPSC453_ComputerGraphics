@@ -2,28 +2,16 @@
 
 #include <vector>
 #include <glm/glm.hpp>
+#include "A_RecursiveShapeScene.h"
 
 typedef glm::vec3 Point;
-typedef Point TrianglePositions[3];
 
-class SerpinskyTriangle
+class SerpinskyTriangle : public A_RecursiveShapeScene
 {
 public:
-	SerpinskyTriangle(TrianglePositions& originalTriangle, int minIterations, int maxIterations);
-
-	size_t numVertices();
-	std::vector<Point> serpinksyVertices();
-	bool incrementIterations();
-	bool decrementIterations();
+	SerpinskyTriangle(std::vector<Point>& originalTriangle, int minIterations, int maxIterations);
 
 private:
-	void findTrianglesRecursively(TrianglePositions& triangle, int iterations);
-	void pushTriangleIntoSerpinksyVertices(TrianglePositions& triangle);
-
-private:
-	int currentIterations_;
-	int minIterations_;
-	int maxIterations_;
-	std::vector<Point> serpinksyVertices_;
-	TrianglePositions& originalTriangle_;
+	void findShapesRecursively(std::vector<Point>& triangle, int iterations) override;
+	void pushShapesIntoVertices(std::vector<Point>& triangle) override;
 };
