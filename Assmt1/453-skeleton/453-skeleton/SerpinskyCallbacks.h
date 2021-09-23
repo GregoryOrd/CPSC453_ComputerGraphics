@@ -3,12 +3,11 @@
 #include "Window.h"
 #include "A_RecursiveShapeScene.h"
 #include "SerpinskyGPUDrawer.h"
-#include "Geometry.h"
 
 class SerpinskyCallbacks : public CallbackInterface
 {
 public:
-	SerpinskyCallbacks(std::vector<A_RecursiveShapeScene*>& sceneShapes, GPU_Geometry& gpuGeom, int* currentSceneNumber);
+	SerpinskyCallbacks(std::vector<A_RecursiveShapeScene*>& sceneShapes, SerpinskyGPUDrawer& gpuDrawer, int* initialSceneNumber);
 
 	virtual void keyCallback(int key, int scancode, int action, int mods);
 

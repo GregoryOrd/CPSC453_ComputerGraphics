@@ -8,6 +8,8 @@
 #include "Shader.h"
 #include "Window.h"
 #include "SerpinskyTriangle.h"
+#include "SerpinskyGPUDrawer.h"
+#include "SquaresAndDiamonds.h"
 #include "SerpinskyCallbacks.h"
 #include "InitialShapeDefs.h"
 #include "A_RecursiveShapeScene.h"
@@ -27,13 +29,16 @@ int main() {
 	//Initialize the shapes for each scene
 	std::vector<A_RecursiveShapeScene*> sceneShapes;
 	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
-	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
+	sceneShapes.push_back(new SquaresAndDiamonds(InitialShapeDefs::originalSquarePositions, 0, 10));
 	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
 	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
 
+	//Instantiate a drawer object with the initial SerpinskyTriangle vertices as the initial vertices.
+	SerpinskyGPUDrawer drawer(gpuGeom, *sceneShapes[0], InitialShapeDefs::sceneNumberToGLPrimitive);
+
 	//Setup Keyboard Callbacks to switch between scenes and
 	//increment/decrement number of iterations in a scene
-	window.setCallbacks(std::make_shared<SerpinskyCallbacks>(sceneShapes, gpuGeom, &currentSceneNumber));
+	window.setCallbacks(std::make_shared<SerpinskyCallbacks>(sceneShapes, drawer, &currentSceneNumber));
 
 	// RENDER LOOP
 	while (!window.shouldClose()) {
@@ -44,7 +49,7 @@ int main() {
 
 		glEnable(GL_FRAMEBUFFER_SRGB);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDrawArrays(GL_TRIANGLES, 0, GLsizei(sceneShapes.at(currentSceneNumber)->numVertices()));
+		drawer.draw(currentSceneNumber, sceneShapes.at(currentSceneNumber)->groupingSize(), sceneShapes.at(currentSceneNumber)->numVertices());
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
 		window.swapBuffers();

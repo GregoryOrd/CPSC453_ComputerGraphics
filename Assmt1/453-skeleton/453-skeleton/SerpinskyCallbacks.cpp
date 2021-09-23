@@ -1,9 +1,9 @@
 #include "SerpinskyCallbacks.h"
 
-SerpinskyCallbacks::SerpinskyCallbacks(std::vector<A_RecursiveShapeScene*>& sceneShapes, GPU_Geometry& gpuGeom, int* currentSceneNumber)
+SerpinskyCallbacks::SerpinskyCallbacks(std::vector<A_RecursiveShapeScene*>& sceneShapes, SerpinskyGPUDrawer& gpuDrawer, int* initialSceneNumber)
 	: sceneShapes_(sceneShapes)
-	, gpuDrawer_(gpuGeom, sceneShapes_.at(0)->vertices())
-	, currentSceneNumber_(currentSceneNumber)
+	, gpuDrawer_(gpuDrawer)
+	, currentSceneNumber_(initialSceneNumber)
 {
 }
 
@@ -13,7 +13,7 @@ void SerpinskyCallbacks::keyCallback(int key, int scancode, int action, int mods
 
 	if (sceneNumberUpdated || iterationNumberUpdated)
 	{
-		gpuDrawer_.drawSerpinskyVertices(sceneShapes_.at(*currentSceneNumber_)->vertices());
+		gpuDrawer_.loadVerticesToGPU(*sceneShapes_.at(*currentSceneNumber_));
 	}
 }
 

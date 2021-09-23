@@ -39,6 +39,9 @@
     <ClCompile Include="ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+	<ClCompile Include="SquaresAndDiamonds.cpp">
+	  <Filter>Source Files</Filter>
+	</ClCompile>
     <ClCompile Include="Geometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -71,6 +74,9 @@
     <ClInclude Include="ShaderProgram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+	<ClInclude Include="SquaresAndDiamonds.h">
+	  <Filter>Header Files</Filter>
+	</ClInclude>
     <ClInclude Include="Geometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>

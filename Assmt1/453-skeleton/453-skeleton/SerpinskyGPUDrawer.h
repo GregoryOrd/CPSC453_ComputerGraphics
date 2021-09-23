@@ -2,23 +2,21 @@
 
 #include "Geometry.h"
 #include <vector>
+#include <map>
 #include <glm/glm.hpp>
+#include "A_RecursiveShapeScene.h"
 
 typedef glm::vec3 Point;
 typedef glm::vec3 Colour;
 
-static const Colour triangleColours[3] = {
-	Colour(1.f, 0.f, 0.f), // top triangle          - red
-	Colour(0.f, 1.f, 0.f), // bottom left triangle  - green
-	Colour(0.f, 0.f, 1.f)  // bottom right triangle - blue
-};
-
 class SerpinskyGPUDrawer
 {
 public:
-	SerpinskyGPUDrawer(GPU_Geometry& gpuGeom, std::vector<Point> initialSerpinksyVertices);
+	SerpinskyGPUDrawer(GPU_Geometry& gpuGeom, A_RecursiveShapeScene& initialScene, std::map<int, int> sceneNumberToGLPrimitiveMap);
 
-	void drawSerpinskyVertices(std::vector<Point> serpinksyVertices);
+	void loadVerticesToGPU(A_RecursiveShapeScene& sceneShape);
+	void draw(int sceneNumber, int groupingSize, int numVertices);
 private:
 	GPU_Geometry& gpuGeom_;
+	std::map<int, int> sceneNumberToGLPrimitiveMap_;
 };

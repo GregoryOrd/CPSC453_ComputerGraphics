@@ -47,3 +47,15 @@ void SerpinskyTriangle::pushShapesIntoVertices(std::vector<Point>& triangle)
 		vertices_.push_back(triangle[i]);
 	}
 }
+
+int SerpinskyTriangle::groupingSize() const
+{
+	//Draw all vertices in one glDrawArrays call
+	return -1;
+}
+
+Colour SerpinskyTriangle::vertexColour(int vertex)
+{
+	int triangleNum = vertex / 3;
+	return triangleColours[triangleNum % 3];
+}
