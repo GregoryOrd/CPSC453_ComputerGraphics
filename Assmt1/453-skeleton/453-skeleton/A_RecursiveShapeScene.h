@@ -15,7 +15,11 @@ public:
 	bool incrementIterations();
 	bool decrementIterations();
 
+	// Returns -1 if the shape is to have all vertices (from all iterations) drawn
+	// by the drawer in a single glDrawArrays call. Otherwise defines the number number
+	// of vertices to be used in each glDrawArrays call.
 	virtual int groupingSize() const = 0;
+
 	virtual Colour vertexColour(int vertex) = 0;
 
 private:

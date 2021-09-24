@@ -45,6 +45,9 @@
     <ClCompile Include="Geometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+	<ClCompile Include="KochSnowflake.cpp">
+	  <Filter>Source Files</Filter>
+	</ClCompile>
     <ClCompile Include="VertexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -80,6 +83,9 @@
     <ClInclude Include="Geometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+	<ClInclude Include="KochSnowflake.h">
+	  <Filter>Header Files</Filter>
+	</ClInclude>
     <ClInclude Include="VertexBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>

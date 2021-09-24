@@ -143,6 +143,7 @@
   <ItemGroup>
 	<ClCompile Include="A_RecursiveShapeScene.cpp" />
     <ClCompile Include="Geometry.cpp" />
+	<ClCompile Include="KochSnowflake.cpp" />
     <ClCompile Include="main.cpp" />
 	<ClCompile Include="SerpinskyCallbacks.cpp" />
 	<ClCompile Include="SerpinskyGPUDrawer.cpp" />
@@ -157,6 +158,7 @@
   <ItemGroup>
 	<ClInclude Include="A_RecursiveShapeScene.h" />
     <ClInclude Include="Geometry.h" />
+	<ClInclude Include="KochSnowflake.h" />
 	<ClInclude Include="SerpinskyCallbacks.h" />
 	<ClCompile Include="SerpinskyGPUDrawer.h" />
 	<ClInclude Include="SerpinskyTriangle.h" />

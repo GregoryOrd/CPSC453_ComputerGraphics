@@ -3,6 +3,7 @@
 
 #include "Geometry.h"
 #include "GLDebug.h"
+#include "KochSnowflake.h"
 #include "Log.h"
 #include "ShaderProgram.h"
 #include "Shader.h"
@@ -30,7 +31,7 @@ int main() {
 	std::vector<A_RecursiveShapeScene*> sceneShapes;
 	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
 	sceneShapes.push_back(new SquaresAndDiamonds(InitialShapeDefs::originalSquarePositions, 0, 10));
-	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
+	sceneShapes.push_back(new KochSnowflake(InitialShapeDefs::originalKochSnowflakeLine, 0, 8));
 	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
 
 	//Instantiate a drawer object with the initial SerpinskyTriangle vertices as the initial vertices.
