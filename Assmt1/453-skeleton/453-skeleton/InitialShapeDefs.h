@@ -21,8 +21,10 @@ namespace InitialShapeDefs
 	};
 
 	std::vector<Point> originalKochSnowflakeLine = {
-		Point(-0.5f, 0.f, 0.f),
-		Point(0.5f, 0.f, 0.f)
+		//Point(-0.5f, 0.f, 0.f),
+		//Point(0.5f, 0.f, 0.f)
+		Point(-0.5f, -0.5f, 0.f),
+		Point(0.f, 0.5f, 0.f),
 	};
 
 	std::map<int, int> sceneNumberToGLPrimitive = {

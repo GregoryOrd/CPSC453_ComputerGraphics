@@ -3,25 +3,19 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-KochSnowflake::KochSnowflake(std::vector<Point>& originalLine, int minIterations, int maxIterations)
-	: A_RecursiveShapeScene(originalLine, minIterations, maxIterations)
+KochSnowflake::KochSnowflake(std::vector<Point>& originalTriangle, int minIterations, int maxIterations)
+	: A_RecursiveShapeScene(originalTriangle, minIterations, maxIterations)
 {
-	findShapesRecursively(originalLine, minIterations);
+	findShapesRecursively(originalTriangle, minIterations);
 }
 
-void KochSnowflake::findShapesRecursively(std::vector<Point>& line, int iterations)
+void KochSnowflake::recurseOverLine(std::vector<Point>& line, int iterations)
 {
-	if (iterations == 0)
-	{
-		pushShapesIntoVertices(line);
-		return;
-	}
-
 	Point pointA = line[0];
 	Point pointB = line[1];
 	Point pointC = (2.f / 3.f) * pointA + (1.f / 3.f) * pointB;
 	Point pointD = (1.f / 3.f) * pointA + (2.f / 3.f) * pointB;
-	Point pointE;
+	Point pointE = { 0.f, 0.f, 0.f };
 
 	Point vectorAB = pointB - pointA;
 	Point iDirectionVector = { 1.f, 0.f, 0.f };
@@ -39,7 +33,7 @@ void KochSnowflake::findShapesRecursively(std::vector<Point>& line, int iteratio
 			0.f
 		};
 	}
-	else if(vectorAB[1] < 0)
+	else if (vectorAB[1] < 0)
 	{
 		pointE =
 		{
@@ -49,18 +43,17 @@ void KochSnowflake::findShapesRecursively(std::vector<Point>& line, int iteratio
 		};
 	}
 
-
 	std::vector<Point> flatLeft = { pointA, pointC };
 	std::vector<Point> angledLeft = { pointC, pointE };
 	std::vector<Point> angledRight = { pointE, pointD };
 	std::vector<Point> flatRight = { pointD, pointB };
 
-	if (iterations > 1)
+	if (iterations > 0)
 	{
-		findShapesRecursively(flatLeft, iterations - 1);
-		findShapesRecursively(angledLeft, iterations - 1);
-		findShapesRecursively(angledRight, iterations - 1);
-		findShapesRecursively(flatRight, iterations - 1);
+		recurseOverLine(flatLeft, iterations - 1);
+		recurseOverLine(angledLeft, iterations - 1);
+		recurseOverLine(angledRight, iterations - 1);
+		recurseOverLine(flatRight, iterations - 1);
 	}
 	else
 	{
@@ -68,6 +61,30 @@ void KochSnowflake::findShapesRecursively(std::vector<Point>& line, int iteratio
 		pushShapesIntoVertices(angledLeft);
 		pushShapesIntoVertices(angledRight);
 		pushShapesIntoVertices(flatRight);
+	}
+}
+
+//In the case of the KochSnowflake we start with a triangle, but need to recurse over
+//lines rather than recursing over triangles. Split the triangle into its legs,
+//then call the recurse over line function.
+void KochSnowflake::findShapesRecursively(std::vector<Point>& triangle, int iterations)
+{
+	std::vector<Point> lineA = { triangle[1], triangle[0] };
+	std::vector<Point> lineB = { triangle[2], triangle[1] };
+	std::vector<Point> lineC = { triangle[0], triangle[2] };
+
+	if (iterations == 0)
+	{
+		pushShapesIntoVertices(lineA);
+		pushShapesIntoVertices(lineB);
+		pushShapesIntoVertices(lineC);
+		return;
+	}
+	else
+	{
+		recurseOverLine(lineA, iterations - 1);
+		recurseOverLine(lineB, iterations - 1);
+		recurseOverLine(lineC, iterations - 1);
 	}
 }
 

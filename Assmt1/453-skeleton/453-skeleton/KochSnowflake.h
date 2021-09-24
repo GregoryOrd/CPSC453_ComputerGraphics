@@ -14,12 +14,13 @@ static const Colour lineColours[4] = {
 class KochSnowflake : public A_RecursiveShapeScene
 {
 public:
-	KochSnowflake(std::vector<Point>& originalLine, int minIterations, int maxIterations);
+	KochSnowflake(std::vector<Point>& originalTriangle, int minIterations, int maxIterations);
 
 	int groupingSize() const override;
 	Colour vertexColour(int vertex) override;
 
 private:
-	void findShapesRecursively(std::vector<Point>& line, int iterations) override;
+	void recurseOverLine(std::vector<Point>& line, int iterations);
+	void findShapesRecursively(std::vector<Point>& triangle, int iterations) override;
 	void pushShapesIntoVertices(std::vector<Point>& line) override;
 };
