@@ -14,6 +14,7 @@
 #include "SerpinskyCallbacks.h"
 #include "InitialShapeDefs.h"
 #include "A_RecursiveShapeScene.h"
+#include "DragonCurve.h"
 
 int main() {
 	//Init
@@ -32,7 +33,7 @@ int main() {
 	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
 	sceneShapes.push_back(new SquaresAndDiamonds(InitialShapeDefs::originalSquarePositions, 0, 10));
 	sceneShapes.push_back(new KochSnowflake(InitialShapeDefs::originalTrianglePositions, 0, 8));
-	sceneShapes.push_back(new SerpinskyTriangle(InitialShapeDefs::originalTrianglePositions, 0, 10));
+	sceneShapes.push_back(new DragonCurve(InitialShapeDefs::originalLine, 0, 10));
 
 	//Instantiate a drawer object with the initial SerpinskyTriangle vertices as the initial vertices.
 	SerpinskyGPUDrawer drawer(gpuGeom, *sceneShapes[0], InitialShapeDefs::sceneNumberToGLPrimitive);

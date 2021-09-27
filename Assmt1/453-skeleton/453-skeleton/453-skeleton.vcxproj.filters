@@ -18,6 +18,9 @@
 	<ClCompile Include="A_RecursiveShapeScene.cpp">
 	  <Filter>Source Files</Filter>
 	</ClCompile>
+	<ClCompile Include="DragonCurve.cpp">
+	  <Filter>Source Files</Filter>
+	</ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -57,6 +60,9 @@
   </ItemGroup>
   <ItemGroup>
 	<ClInclude Include="A_RecursiveShapeScene.h">
+	  <Filter>Header Files</Filter>
+	</ClInclude>
+	<ClInclude Include="DragonCurve.h">
 	  <Filter>Header Files</Filter>
 	</ClInclude>
     <ClInclude Include="Shader.h">
