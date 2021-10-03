@@ -24,10 +24,10 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-	<ClCompile Include="SerpinskyCallbacks.cpp">
+	<ClCompile Include="Callbacks.cpp">
 	  <Filter>Source Files</Filter>
 	</ClCompile>
-	<ClCompile Include="SerpinskyGPUDrawer.cpp">
+	<ClCompile Include="GPUDrawer.cpp">
 	  <Filter>Source Files</Filter>
 	</ClCompile>
 	<ClCompile Include="SerpinskyTriangle.cpp">
@@ -71,10 +71,10 @@
     <ClInclude Include="Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-	<ClInclude Include="SerpinskyCallbacks.h">
+	<ClInclude Include="Callbacks.h">
 	  <Filter>Header Files</Filter>
 	</ClInclude>
-	<ClInclude Include="SerpinskyGPUDrawer.h">
+	<ClInclude Include="GPUDrawer.h">
 	  <Filter>Header Files</Filter>
 	</ClInclude>
 	<ClInclude Include="SerpinskyTriangle.h">

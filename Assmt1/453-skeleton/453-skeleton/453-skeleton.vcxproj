@@ -146,8 +146,8 @@
     <ClCompile Include="Geometry.cpp" />
 	<ClCompile Include="KochSnowflake.cpp" />
     <ClCompile Include="main.cpp" />
-	<ClCompile Include="SerpinskyCallbacks.cpp" />
-	<ClCompile Include="SerpinskyGPUDrawer.cpp" />
+	<ClCompile Include="Callbacks.cpp" />
+	<ClCompile Include="GPUDrawer.cpp" />
 	<ClCompile Include="SerpinskyTriangle.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
@@ -161,8 +161,8 @@
 	<ClInclude Include="DragonCurve.h" />
     <ClInclude Include="Geometry.h" />
 	<ClInclude Include="KochSnowflake.h" />
-	<ClInclude Include="SerpinskyCallbacks.h" />
-	<ClCompile Include="SerpinskyGPUDrawer.h" />
+	<ClInclude Include="Callbacks.h" />
+	<ClCompile Include="GPUDrawer.h" />
 	<ClInclude Include="SerpinskyTriangle.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderProgram.h" />

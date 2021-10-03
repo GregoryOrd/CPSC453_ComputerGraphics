@@ -9,9 +9,9 @@
 #include "Shader.h"
 #include "Window.h"
 #include "SerpinskyTriangle.h"
-#include "SerpinskyGPUDrawer.h"
+#include "GPUDrawer.h"
 #include "SquaresAndDiamonds.h"
-#include "SerpinskyCallbacks.h"
+#include "Callbacks.h"
 #include "InitialShapeDefs.h"
 #include "A_RecursiveShapeScene.h"
 #include "DragonCurve.h"
@@ -20,7 +20,7 @@ int main() {
 	//Init
 	Log::debug("Starting main");
 	glfwInit();
-	Window window(800, 800, "Serpinksy Triangle and Menger Sponge");
+	Window window(800, 800, "Assignment #1 - Fractal Geometry");
 	GLDebug::enable();
 	ShaderProgram shader("shaders/test.vert", "shaders/test.frag");
 	int currentSceneNumber = 0;
@@ -36,11 +36,11 @@ int main() {
 	sceneShapes.push_back(new DragonCurve(InitialShapeDefs::originalLine, 0, 10));
 
 	//Instantiate a drawer object with the initial SerpinskyTriangle vertices as the initial vertices.
-	SerpinskyGPUDrawer drawer(gpuGeom, *sceneShapes[0], InitialShapeDefs::sceneNumberToGLPrimitive);
+	GPUDrawer drawer(gpuGeom, *sceneShapes[0], InitialShapeDefs::sceneNumberToGLPrimitive);
 
 	//Setup Keyboard Callbacks to switch between scenes and
 	//increment/decrement number of iterations in a scene
-	window.setCallbacks(std::make_shared<SerpinskyCallbacks>(sceneShapes, drawer, &currentSceneNumber));
+	window.setCallbacks(std::make_shared<Callbacks>(sceneShapes, drawer, &currentSceneNumber));
 
 	// RENDER LOOP
 	while (!window.shouldClose()) {

@@ -1,13 +1,13 @@
-#include "SerpinskyGPUDrawer.h"
+#include "GPUDrawer.h"
 
-SerpinskyGPUDrawer::SerpinskyGPUDrawer(GPU_Geometry& gpuGeom, A_RecursiveShapeScene& initialScene, std::map<int, int> sceneNumberToGLPrimitiveMap)
+GPUDrawer::GPUDrawer(GPU_Geometry& gpuGeom, A_RecursiveShapeScene& initialScene, std::map<int, int> sceneNumberToGLPrimitiveMap)
 	: gpuGeom_(gpuGeom)
 	, sceneNumberToGLPrimitiveMap_(sceneNumberToGLPrimitiveMap)
 {
 	loadVerticesToGPU(initialScene);
 }
 
-void SerpinskyGPUDrawer::loadVerticesToGPU(A_RecursiveShapeScene& sceneShape)
+void GPUDrawer::loadVerticesToGPU(A_RecursiveShapeScene& sceneShape)
 {
 	//Clear new CPU Geometry
 	CPU_Geometry cpuGeom;
@@ -29,7 +29,7 @@ void SerpinskyGPUDrawer::loadVerticesToGPU(A_RecursiveShapeScene& sceneShape)
 	gpuGeom_.setCols(cpuGeom.cols);
 }
 
-void SerpinskyGPUDrawer::draw(int sceneNumber, int groupingSize, int numVertices)
+void GPUDrawer::draw(int sceneNumber, int groupingSize, int numVertices)
 {
 	if (groupingSize == -1)
 	{
