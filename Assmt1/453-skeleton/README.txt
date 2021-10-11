@@ -6,7 +6,7 @@ In this environment, the cmake generation identified the C and CXX compilers to 
 MSVC version 14.25.28610
 
 To build this program in Visual Studio with Desktop C++ Development tools installed, you should just need
-to use the "Open Folder" option in Visual Studio to open the folder with the CMakeLists.txt file. Visual Studio
+to use the "Open Local Folder" option in Visual Studio to open the "GregoryOrd_CPSC453_A1" folder. Visual Studio
 should automatically start the CMake generation since the Desktop C++ Development tools are installed. Once 
 the CMake generation is completed, select "453-skeleton.exe" as the "Startup Item", then click on the green arrow 
 beside the "Startup Item" dropdown to compile and run the program.
