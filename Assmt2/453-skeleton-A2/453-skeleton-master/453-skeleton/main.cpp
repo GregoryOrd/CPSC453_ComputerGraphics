@@ -106,11 +106,42 @@ float findAngleFromXAxisBasedOnQuadrants(glm::vec3 centreOfShipToClickedPosition
 	return clickAngleFromXAxis;
 }
 
+void translateShip(GameObject& ship, float xIncrement, float yIncrement)
+{
+	std::vector<glm::vec3> newVerts;
+	float translationLength = 0.01f;
+	glm::vec3 translationVector = { translationLength*xIncrement, translationLength*yIncrement, 0.0f };
+	for (glm::vec3 vert : ship.cgeom.verts)
+	{
+		newVerts.push_back(vert + translationVector);
+	}
+
+	ship.cgeom.verts = newVerts;
+	ship.ggeom.setVerts(newVerts);
+}
+
 // EXAMPLE CALLBACKS
 class MyCallbacks : public CallbackInterface {
 
 public:
 	MyCallbacks(GameObject& ship, CursorPositionConverter& converter) : ship_(ship), converter_(converter), xPos_(0), yPos_(0) {}
+
+	virtual void keyCallback(int key, int scancode, int action, int mods)
+	{
+		if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
+		{
+			float xIncrement = cos(ship_.theta);
+			float yIncrement = sin(ship_.theta);
+			translateShip(ship_, xIncrement, yIncrement);
+
+		}
+		else if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
+		{
+			float xIncrement = -cos(ship_.theta);
+			float yIncrement = -sin(ship_.theta);
+			translateShip(ship_, xIncrement, yIncrement);
+		}
+	}
 
 	virtual void mouseButtonCallback(int button, int action, int mods) {
 		if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS)
