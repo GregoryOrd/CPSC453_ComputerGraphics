@@ -118,6 +118,7 @@ void translateShip(GameObject& ship, float xIncrement, float yIncrement)
 
 	ship.cgeom.verts = newVerts;
 	ship.ggeom.setVerts(newVerts);
+	ship.position = ship.position + translationVector;
 }
 
 // EXAMPLE CALLBACKS
@@ -154,8 +155,6 @@ public:
 			float arcTanClickAngle = atan(centreOfShipToClickedPosition[1] / centreOfShipToClickedPosition[0]);
 			float clickAngleFromXAxis = findAngleFromXAxisBasedOnQuadrants(centreOfShipToClickedPosition, arcTanClickAngle);
 			float angleDiff = clickAngleFromXAxis - ship_.theta;
-
-			std::cout << "AngleDiff: " << angleDiff * 180 / PI << std::endl;
 
 			ship_.numRotations = 150.f;
 			if (abs(angleDiff) > PI)
@@ -237,7 +236,10 @@ void rotatePlayer(GameObject& ship)
 		std::vector<glm::vec3> newVerts;
 		for (glm::vec3 vert : ship.cgeom.verts)
 		{
-			newVerts.push_back(rotationToIterationAngle * rotationToXAxis * vert);
+			vert = vert - ship.position; //Translate to the origin
+			vert = rotationToIterationAngle * rotationToXAxis * vert; //Rotate about the origin
+			vert = vert + ship.position; //Translate back to the ship position
+			newVerts.push_back(vert);
 		}
 
 		ship.cgeom.verts = newVerts;
