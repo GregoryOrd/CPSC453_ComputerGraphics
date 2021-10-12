@@ -79,6 +79,33 @@ private:
 	Window& window_;
 };
 
+float findAngleFromXAxisBasedOnQuadrants(glm::vec3 centreOfShipToClickedPosition, float arcTanClickAngle)
+{
+	float clickAngleFromXAxis = 0.0f;
+	if (centreOfShipToClickedPosition[0] > 0 && centreOfShipToClickedPosition[1] > 0)
+	{
+		//Top Right Quadrant
+		clickAngleFromXAxis = arcTanClickAngle;
+	}
+	else if (centreOfShipToClickedPosition[0] < 0 && centreOfShipToClickedPosition[1] > 0)
+	{
+		//Top Left Quadrant
+		clickAngleFromXAxis = PI + arcTanClickAngle; //arcTanClickAngle is negative here
+	}
+	else if (centreOfShipToClickedPosition[0] > 0 && centreOfShipToClickedPosition[1] < 0)
+	{
+		//Bottom Right Quadrant
+		clickAngleFromXAxis = 2 * PI + arcTanClickAngle; //arcTanClickAngle is negative here
+	}
+	else if (centreOfShipToClickedPosition[0] < 0 && centreOfShipToClickedPosition[1] < 0)
+	{
+		//Bottom Left Quadrant
+		clickAngleFromXAxis = PI + arcTanClickAngle; //arcTanClickAngle is positive here
+	}
+
+	return clickAngleFromXAxis;
+}
+
 // EXAMPLE CALLBACKS
 class MyCallbacks : public CallbackInterface {
 
@@ -91,65 +118,23 @@ public:
 			double convertedXPos = converter_.convertedXPos(xPos_);
 			double convertedYPos = converter_.convertedYPos(yPos_);
 		
-			glm::vec3 centreOfShipToClickedPosition =
-			{
-				convertedXPos - ship_.position[0],
-				convertedYPos - ship_.position[1],
-				0
-			};
+			glm::vec3 centreOfShipToClickedPosition = { convertedXPos - ship_.position[0], convertedYPos - ship_.position[1], 0 };
 
-			float clickAngleFromXAxis = ship_.theta;
 			float arcTanClickAngle = atan(centreOfShipToClickedPosition[1] / centreOfShipToClickedPosition[0]);
-			if (centreOfShipToClickedPosition[0] > 0 && centreOfShipToClickedPosition[1] > 0)
-			{
-				//Top Right Quadrant
-				clickAngleFromXAxis = arcTanClickAngle;
-			}
-			else if (centreOfShipToClickedPosition[0] < 0 && centreOfShipToClickedPosition[1] > 0)
-			{
-				//Top Left Quadrant
-				clickAngleFromXAxis = PI + arcTanClickAngle; //arcTanClickAngle is negative here
-			}
-			else if (centreOfShipToClickedPosition[0] > 0 && centreOfShipToClickedPosition[1] < 0)
-			{
-				//Bottom Right Quadrant
-				clickAngleFromXAxis = 2 * PI + arcTanClickAngle; //arcTanClickAngle is negative here
-			}
-			else if (centreOfShipToClickedPosition[0] < 0 && centreOfShipToClickedPosition[1] < 0)
-			{
-				//Bottom Left Quadrant
-				clickAngleFromXAxis = PI + arcTanClickAngle; //arcTanClickAngle is positive here
-			}
+			float clickAngleFromXAxis = findAngleFromXAxisBasedOnQuadrants(centreOfShipToClickedPosition, arcTanClickAngle);
+			float angleDiff = clickAngleFromXAxis - ship_.theta;
 
-			float absAngleDiff = abs(clickAngleFromXAxis - ship_.theta);
+			std::cout << "AngleDiff: " << angleDiff * 180 / PI << std::endl;
+
+			ship_.numRotations = 150.f;
+			if (abs(angleDiff) > PI)
+			{
+				clickAngleFromXAxis = clickAngleFromXAxis - (2 * PI);
+				angleDiff = angleDiff - (2 * PI);
+			}
 
 			ship_.rotationFinishAngle = clickAngleFromXAxis;
-			ship_.numRotations = 50.f;
-			ship_.rotationIncrement = absAngleDiff / ship_.numRotations;
-
-			/*
-			glm::mat3 rotationToXAxis = {
-				{cos(ship_.theta), -sin(ship_.theta), 0.0f},
-				{sin(ship_.theta), cos(ship_.theta), 0.0f},
-				{0.f, 0.f, 0.f}
-			};
-
-			glm::mat3 rotationToClickAngle = {
-				{cos(clickAngleFromXAxis), sin(clickAngleFromXAxis), 0.0f},
-				{sin(clickAngleFromXAxis), -cos(clickAngleFromXAxis), 0.0f},
-				{0.f, 0.f, 0.f}
-			};
-
-			std::vector<glm::vec3> newVerts;
-			for (glm::vec3 vert : ship_.cgeom.verts)
-			{
-				newVerts.push_back(rotationToClickAngle * rotationToXAxis * vert);
-			}
-
-			ship_.cgeom.verts = newVerts;
-			ship_.ggeom.setVerts(newVerts);
-			ship_.theta = clickAngleFromXAxis;*/
-			
+			ship_.rotationIncrement = angleDiff / ship_.numRotations;
 		}
 	}
 
