@@ -49,6 +49,55 @@ struct GameObject {
 	bool isVisible;
 };
 
+void rotatePlayerToOriginalPosition(GameObject& ship)
+{
+	glm::mat3 rotationToXAxis = {
+		{cos(ship.theta), -sin(ship.theta), 0.0f},
+		{sin(ship.theta), cos(ship.theta), 0.0f},
+		{0.f, 0.f, 0.f}
+	};
+
+	glm::mat3 rotationToOriginalPosition = {
+		{cos(-PI / 2), -sin(-PI / 2), 0.0f},
+		{sin(-PI / 2), cos(-PI / 2), 0.0f},
+		{0.f, 0.f, 0.f}
+	};
+
+	std::vector<glm::vec3> newVerts;
+	for (glm::vec3 vert : ship.cgeom.verts)
+	{
+		vert = vert - ship.position; //Translate to the origin
+		vert = rotationToOriginalPosition * rotationToXAxis * vert; //Rotate about the origin
+		vert = vert + ship.position; //Translate back to the ship position
+		newVerts.push_back(vert);
+	}
+
+	ship.cgeom.verts = newVerts;
+	ship.ggeom.setVerts(newVerts);
+	ship.theta = PI / 2;
+}
+
+void scaleShip(GameObject& ship, bool scaleUp = true)
+{
+	float scalingFactor = 1.25;
+	if (!scaleUp)
+	{
+		scalingFactor = 1 / scalingFactor;
+	}
+	std::vector<glm::vec3> newVerts;
+	for (glm::vec3 vert : ship.cgeom.verts)
+	{
+		glm::vec3 newVert = vert - ship.position; //Translate to origin
+		newVert = newVert * scalingFactor; //Scale
+		newVert = newVert + ship.position; //Translate back to ship position
+		newVerts.push_back(newVert);
+	}
+
+	ship.cgeom.verts = newVerts;
+	ship.ggeom.setVerts(newVerts);
+
+}
+
 class CursorPositionConverter
 {
 public:
@@ -122,11 +171,27 @@ void translateShip(GameObject& ship, float xIncrement, float yIncrement)
 	ship.position = ship.position + translationVector;
 }
 
+bool reset = false;
+
+void resetScene(GameObject& ship, std::vector<GameObject*> gameObjects)
+{
+	translateShip(ship, -100*ship.position[0], -100*ship.position[1]);
+	for (GameObject* gameObject : gameObjects)
+	{
+		if (!gameObject->isVisible)
+		{
+			scaleShip(ship, false);
+			gameObject->isVisible = true;
+		}
+	}
+	rotatePlayerToOriginalPosition(ship);
+}
+
 // EXAMPLE CALLBACKS
 class MyCallbacks : public CallbackInterface {
 
 public:
-	MyCallbacks(GameObject& ship, CursorPositionConverter& converter) : ship_(ship), converter_(converter), xPos_(0), yPos_(0) {}
+	MyCallbacks(GameObject& ship, std::vector<GameObject*> gameObjects, CursorPositionConverter& converter) : ship_(ship), gameObjects_(gameObjects), converter_(converter), xPos_(0), yPos_(0) {}
 
 	virtual void keyCallback(int key, int scancode, int action, int mods)
 	{
@@ -142,6 +207,10 @@ public:
 			float xIncrement = -cos(ship_.theta);
 			float yIncrement = -sin(ship_.theta);
 			translateShip(ship_, xIncrement, yIncrement);
+		}
+		else if (key == GLFW_KEY_R && action == GLFW_PRESS)
+		{
+			resetScene(ship_, gameObjects_);
 		}
 	}
 
@@ -176,6 +245,7 @@ public:
 
 private:
 	GameObject& ship_;
+	std::vector<GameObject*> gameObjects_;
 	CursorPositionConverter& converter_;
 	double xPos_;
 	double yPos_;
@@ -250,23 +320,6 @@ void rotatePlayer(GameObject& ship)
 	}
 }
 
-void scaleShip(GameObject& ship)
-{
-	float scalingFactor = 1.25;
-	std::vector<glm::vec3> newVerts;
-	for (glm::vec3 vert : ship.cgeom.verts)
-	{
-		glm::vec3 newVert = vert - ship.position; //Translate to origin
-		newVert = newVert * scalingFactor; //Scale
-		newVert = newVert + ship.position; //Translate back to ship position
-		newVerts.push_back(newVert);
-	}
-
-	ship.cgeom.verts = newVerts;
-	ship.ggeom.setVerts(newVerts);
-
-}
-
 void checkForDiamondCollions(GameObject& ship, std::vector<GameObject*> gameObjects)
 {
 	for (GameObject* gameObject : gameObjects)
@@ -303,10 +356,6 @@ int main() {
 	ship.ggeom.setVerts(ship.cgeom.verts);
 	ship.ggeom.setTexCoords(ship.cgeom.texCoords);
 
-	// CALLBACKS
-	CursorPositionConverter positionConverter(window);
-	window.setCallbacks(std::make_shared<MyCallbacks>(ship, positionConverter)); // can also update callbacks to new ones
-
 	GameObject diamond("textures/diamond.png", GL_NEAREST);
 	glm::vec3 diamondPosition = { 0.5f, 0.5f, 0.0f };
 	diamond.position = diamondPosition;
@@ -340,6 +389,10 @@ int main() {
 	gameObjects.push_back(&diamond2);
 	gameObjects.push_back(&diamond3);
 	gameObjects.push_back(&diamond4);
+
+	// CALLBACKS
+	CursorPositionConverter positionConverter(window);
+	window.setCallbacks(std::make_shared<MyCallbacks>(ship, gameObjects, positionConverter)); // can also update callbacks to new ones
 
 	// RENDER LOOP
 	while (!window.shouldClose()) {
