@@ -46,6 +46,7 @@ struct GameObject {
 	float rotationIncrement;
 	float numRotations;
 	float rotationFinishAngle;
+	bool isVisible;
 };
 
 class CursorPositionConverter
@@ -249,6 +250,39 @@ void rotatePlayer(GameObject& ship)
 	}
 }
 
+void scaleShip(GameObject& ship)
+{
+	float scalingFactor = 1.25;
+	std::vector<glm::vec3> newVerts;
+	for (glm::vec3 vert : ship.cgeom.verts)
+	{
+		glm::vec3 newVert = vert - ship.position; //Translate to origin
+		newVert = newVert * scalingFactor; //Scale
+		newVert = newVert + ship.position; //Translate back to ship position
+		newVerts.push_back(newVert);
+	}
+
+	ship.cgeom.verts = newVerts;
+	ship.ggeom.setVerts(newVerts);
+
+}
+
+void checkForDiamondCollions(GameObject& ship, std::vector<GameObject*> gameObjects)
+{
+	for (GameObject* gameObject : gameObjects)
+	{
+		float distanceBetweenShipAndObject = glm::distance(ship.position, gameObject->position);
+		if (gameObject->isVisible)
+		{
+			if (distanceBetweenShipAndObject <= 0.1)
+			{
+				gameObject->isVisible = false;
+				scaleShip(ship);
+			}
+		}
+	}
+}
+
 int main() {
 	Log::debug("Starting main");
 
@@ -274,14 +308,45 @@ int main() {
 	window.setCallbacks(std::make_shared<MyCallbacks>(ship, positionConverter)); // can also update callbacks to new ones
 
 	GameObject diamond("textures/diamond.png", GL_NEAREST);
-	diamond.cgeom = shipGeom(0.18f, 0.12f, 0.5f, 0.5f);
+	glm::vec3 diamondPosition = { 0.5f, 0.5f, 0.0f };
+	diamond.position = diamondPosition;
+	diamond.cgeom = shipGeom(0.18f, 0.12f, diamondPosition[0], diamondPosition[1]);
 	diamond.ggeom.setVerts(diamond.cgeom.verts);
 	diamond.ggeom.setTexCoords(diamond.cgeom.texCoords);
 
+	GameObject diamond2("textures/diamond.png", GL_NEAREST);
+	glm::vec3 diamond2Position = {-0.5f, 0.5f, 0.0f };
+	diamond2.position = diamond2Position;
+	diamond2.cgeom = shipGeom(0.18f, 0.12f, diamond2Position[0], diamond2Position[1]);
+	diamond2.ggeom.setVerts(diamond2.cgeom.verts);
+	diamond2.ggeom.setTexCoords(diamond2.cgeom.texCoords);
+
+	GameObject diamond3("textures/diamond.png", GL_NEAREST);
+	glm::vec3 diamond3Position = { 0.5f, -0.5f, 0.0f };
+	diamond3.position = diamond3Position;
+	diamond3.cgeom = shipGeom(0.18f, 0.12f, diamond3Position[0], diamond3Position[1]);
+	diamond3.ggeom.setVerts(diamond3.cgeom.verts);
+	diamond3.ggeom.setTexCoords(diamond3.cgeom.texCoords);
+
+	GameObject diamond4("textures/diamond.png", GL_NEAREST);
+	glm::vec3 diamond4Position = { -0.5f, -0.5f, 0.0f };
+	diamond4.position = diamond4Position;
+	diamond4.cgeom = shipGeom(0.18f, 0.12f, diamond4Position[0], diamond4Position[1]);
+	diamond4.ggeom.setVerts(diamond4.cgeom.verts);
+	diamond4.ggeom.setTexCoords(diamond4.cgeom.texCoords);
+
+	std::vector<GameObject*> gameObjects;
+	gameObjects.push_back(&diamond);
+	gameObjects.push_back(&diamond2);
+	gameObjects.push_back(&diamond3);
+	gameObjects.push_back(&diamond4);
+
 	// RENDER LOOP
 	while (!window.shouldClose()) {
-		int score;
+		int score = 0;
 		glfwPollEvents();
+
+		checkForDiamondCollions(ship, gameObjects);
 
 		shader.use();
 		rotatePlayer(ship);
@@ -293,10 +358,21 @@ int main() {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		ship.texture.unbind();
 
-		diamond.ggeom.bind();
-		diamond.texture.bind();
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		diamond.texture.unbind();
+		for (GameObject* gameObject : gameObjects)
+		{
+			if (gameObject->isVisible)
+			{
+				gameObject->ggeom.bind();
+				gameObject->texture.bind();
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				gameObject->texture.unbind();
+			}
+			else
+			{
+				score++;
+			}
+		}
+
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
 		// Starting the new ImGui frame
@@ -322,9 +398,14 @@ int main() {
 
 		// Scale up text a little, and set its value
 		ImGui::SetWindowFontScale(1.5f);
-		ImGui::Text("Score: %d", 0); // Second parameter gets passed into "%d"
+		ImGui::Text("Score: %d\n", score); // Second parameter gets passed into "%d"
+		if (score == 4)
+		{
+			ImGui::SetWindowFontScale(3.0f);
+			ImGui::Text("Congratulations!\nYou got all of the diamonds!\nYou won the game!");
+		}
 
-		// End the window.
+		// End the windowi
 		ImGui::End();
 
 		ImGui::Render();	// Render the ImGui window
