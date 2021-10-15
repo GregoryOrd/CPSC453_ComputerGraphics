@@ -18,6 +18,14 @@
 
 #define PI 3.14159265359
 
+//Shader Uniforms
+glm::vec3 translationVector = { 0.f, 0.f, 0.f };
+glm::mat3 rotationMatrix = {
+	{0.0f, 0.0f, 0.0f},
+	{0.0f, 0.0f, 0.0f},
+	{0.0f, 0.0f, 0.0f}
+};
+
 // An example struct for Game Objects.
 // You are encouraged to customize this as you see fit.
 struct GameObject {
@@ -158,17 +166,9 @@ float findAngleFromXAxisBasedOnQuadrants(glm::vec3 centreOfShipToClickedPosition
 
 void translateShip(GameObject& ship, float xIncrement, float yIncrement)
 {
-	std::vector<glm::vec3> newVerts;
 	float translationLength = 0.01f;
-	glm::vec3 translationVector = { translationLength*xIncrement, translationLength*yIncrement, 0.0f };
-	for (glm::vec3 vert : ship.cgeom.verts)
-	{
-		newVerts.push_back(vert + translationVector);
-	}
-
-	ship.cgeom.verts = newVerts;
-	ship.ggeom.setVerts(newVerts);
-	ship.position = ship.position + translationVector;
+	glm::vec3 translation = { translationLength * xIncrement, translationLength * yIncrement, 0.0f };
+	ship.position = ship.position + translation;
 }
 
 bool reset = false;
@@ -197,16 +197,11 @@ public:
 	{
 		if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			float xIncrement = cos(ship_.theta);
-			float yIncrement = sin(ship_.theta);
-			translateShip(ship_, xIncrement, yIncrement);
-
+			translateShip(ship_, cos(ship_.theta), sin(ship_.theta));
 		}
 		else if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			float xIncrement = -cos(ship_.theta);
-			float yIncrement = -sin(ship_.theta);
-			translateShip(ship_, xIncrement, yIncrement);
+			translateShip(ship_, -cos(ship_.theta), -sin(ship_.theta));
 		}
 		else if (key == GLFW_KEY_R && action == GLFW_PRESS)
 		{
@@ -408,8 +403,26 @@ int main() {
 		glEnable(GL_FRAMEBUFFER_SRGB);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		ship.texture.bind();
+
+		translationVector = ship.position;
+		rotationMatrix = {
+			{cos(ship.theta), -sin(ship.theta), 0.0f},
+			{sin(ship.theta), cos(ship.theta), 0.0f},
+			{0.f, 0.f, 0.f}
+		};
+		GLint translationVectorShaderVariable = glGetUniformLocation(shader.programId(), "translationVector");
+		glUniform3f(translationVectorShaderVariable, translationVector[0], translationVector[1], translationVector[2]);
+
+
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		ship.texture.unbind();
+		translationVector = { 0.f, 0.f, 0.f };
+		rotationMatrix = {
+			{ 0.f, 0.f, 0.f },
+			{ 0.f, 0.f, 0.f },
+			{ 0.f, 0.f, 0.f }
+		};
+		glUniform3f(translationVectorShaderVariable, translationVector[0], translationVector[1], translationVector[2]);
 
 		for (GameObject* gameObject : gameObjects)
 		{
