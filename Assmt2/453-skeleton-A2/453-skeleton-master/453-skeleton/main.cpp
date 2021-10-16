@@ -19,45 +19,106 @@
 #define PI 3.14159265359
 
 //Shader Uniforms
-glm::vec3 translationVector = { 0.f, 0.f, 0.f };
-glm::mat3 rotationMatrix = {
-	{0.0f, 0.0f, 0.0f},
-	{0.0f, 0.0f, 0.0f},
-	{0.0f, 0.0f, 0.0f}
+glm::mat4 globalTransformationMatrix = {
+	{1.0f, 0.0f, 0.0f, 0.0f},
+	{0.0f, 1.0f, 0.0f, 0.0f},
+	{0.0f, 0.0f, 1.0f, 0.0f},
+	{0.0f, 0.0f, 0.0f, 1.0f}
 };
+
+bool animatingARotation = false;
+float animationIncrement = 0.0f;
+float numAnimationFrames = 60.0f;
+
+CPU_Geometry gameObjectGeometry() {
+	CPU_Geometry retGeom;
+
+	// For full marks (Part IV), you'll need to use the following vertex coordinates instead.
+	// Then, you'd get the correct scale/translation/rotation by passing in uniforms into
+	// the vertex shader.
+
+	retGeom.verts.push_back(glm::vec3(-1.f, 1.f, 0.f));
+	retGeom.verts.push_back(glm::vec3(-1.f, -1.f, 0.f));
+	retGeom.verts.push_back(glm::vec3(1.f, -1.f, 0.f));
+	retGeom.verts.push_back(glm::vec3(-1.f, 1.f, 0.f));
+	retGeom.verts.push_back(glm::vec3(1.f, -1.f, 0.f));
+	retGeom.verts.push_back(glm::vec3(1.f, 1.f, 0.f));
+
+
+	// texture coordinates
+	retGeom.texCoords.push_back(glm::vec2(0.f, 1.f));
+	retGeom.texCoords.push_back(glm::vec2(0.f, 0.f));
+	retGeom.texCoords.push_back(glm::vec2(1.f, 0.f));
+	retGeom.texCoords.push_back(glm::vec2(0.f, 1.f));
+	retGeom.texCoords.push_back(glm::vec2(1.f, 0.f));
+	retGeom.texCoords.push_back(glm::vec2(1.f, 1.f));
+	return retGeom;
+}
 
 // An example struct for Game Objects.
 // You are encouraged to customize this as you see fit.
 struct GameObject {
 	// Struct's constructor deals with the texture.
 	// Also sets default position, theta, scale, and transformationMatrix
-	GameObject(std::string texturePath, GLenum textureInterpolation) :
+	GameObject(std::string texturePath, GLenum textureInterpolation, float xPos, float yPos) :
 		texture(texturePath, textureInterpolation),
-		position(0.0f, 0.0f, 0.0f),
-		theta(PI/2),
+		position(xPos, yPos, 0.0f),
+		theta(0),
+		previousTheta(0),
 		scale(1),
 		transformationMatrix(1.0f), // This constructor sets it as the identity matrix
-		rotationIncrement(0.0f),
-		numRotations(0.0f)
-	{}
+		isVisible(true)
+	{
+		scalingMatrix = {
+			{scale * 0.09f, 0.0f, 0.0f, 0.0f},
+			{0.0f, scale * 0.06f, 0.0f, 0.0f},
+			{0.0f, 0.0f, 1.0f, 0.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f}
+		};
+
+		translationMatrix = {
+			{1.0f, 0.0f, 0.0f, 0.0f},
+			{0.0f, 1.0f, 0.0f, 0.0f},
+			{0.0f, 0.0f, 1.0f, 0.0f},
+			{xPos, yPos, 0.0f, 1.0f}
+		};
+
+		rotationMatrix = {
+			{1.0f, 0.0f, 0.0f, 0.0f},
+			{0.0f, 1.0f, 0.0f, 0.0f},
+			{0.0f, 0.0f, 1.0f, 0.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f}
+		};
+
+		transformationMatrix = translationMatrix * rotationMatrix * scalingMatrix;
+
+		cgeom = gameObjectGeometry();
+		ggeom.setVerts(cgeom.verts);
+		ggeom.setTexCoords(cgeom.texCoords);
+	}
+
+	glm::mat4 updateTransformationMatrix()
+	{
+		transformationMatrix = translationMatrix * rotationMatrix * scalingMatrix;
+		return transformationMatrix;
+	}
 
 	CPU_Geometry cgeom;
 	GPU_Geometry ggeom;
 	Texture texture;
 
 	glm::vec3 position;
-	float theta; // Object's rotation
-	// Alternatively, you could represent rotation via a normalized heading vec:
-	// glm::vec3 heading; //Will make sure this is always a unit vector
+	float theta;
+	float previousTheta;
 	float scale;
 	glm::mat4 transformationMatrix;
-	float rotationIncrement;
-	float numRotations;
-	float rotationFinishAngle;
+	glm::mat4 translationMatrix;
+	glm::mat4 scalingMatrix;
+	glm::mat4 rotationMatrix;
 	bool isVisible;
 };
 
-void rotatePlayerToOriginalPosition(GameObject& ship)
+/*void rotatePlayerToOriginalPosition(GameObject& ship)
 {
 	glm::mat3 rotationToXAxis = {
 		{cos(ship.theta), -sin(ship.theta), 0.0f},
@@ -83,7 +144,7 @@ void rotatePlayerToOriginalPosition(GameObject& ship)
 	ship.cgeom.verts = newVerts;
 	ship.ggeom.setVerts(newVerts);
 	ship.theta = PI / 2;
-}
+}*/
 
 void scaleShip(GameObject& ship, bool scaleUp = true)
 {
@@ -92,18 +153,7 @@ void scaleShip(GameObject& ship, bool scaleUp = true)
 	{
 		scalingFactor = 1 / scalingFactor;
 	}
-	std::vector<glm::vec3> newVerts;
-	for (glm::vec3 vert : ship.cgeom.verts)
-	{
-		glm::vec3 newVert = vert - ship.position; //Translate to origin
-		newVert = newVert * scalingFactor; //Scale
-		newVert = newVert + ship.position; //Translate back to ship position
-		newVerts.push_back(newVert);
-	}
-
-	ship.cgeom.verts = newVerts;
-	ship.ggeom.setVerts(newVerts);
-
+	ship.scale *= scalingFactor;
 }
 
 class CursorPositionConverter
@@ -171,9 +221,7 @@ void translateShip(GameObject& ship, float xIncrement, float yIncrement)
 	ship.position = ship.position + translation;
 }
 
-bool reset = false;
-
-void resetScene(GameObject& ship, std::vector<GameObject*> gameObjects)
+/*void resetScene(GameObject& ship, std::vector<GameObject*> gameObjects)
 {
 	translateShip(ship, -100*ship.position[0], -100*ship.position[1]);
 	for (GameObject* gameObject : gameObjects)
@@ -185,9 +233,17 @@ void resetScene(GameObject& ship, std::vector<GameObject*> gameObjects)
 		}
 	}
 	rotatePlayerToOriginalPosition(ship);
+}*/
+
+float normalizedAngle(float angle)
+{
+	while (angle >= 2 * PI)
+	{
+		angle -= 2 * PI;
+	}
+	return angle;
 }
 
-// EXAMPLE CALLBACKS
 class MyCallbacks : public CallbackInterface {
 
 public:
@@ -197,15 +253,15 @@ public:
 	{
 		if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			translateShip(ship_, cos(ship_.theta), sin(ship_.theta));
+			//translateShip(ship_, cos(ship_.theta), sin(ship_.theta));
 		}
 		else if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			translateShip(ship_, -cos(ship_.theta), -sin(ship_.theta));
+			//translateShip(ship_, -cos(ship_.theta), -sin(ship_.theta));
 		}
 		else if (key == GLFW_KEY_R && action == GLFW_PRESS)
 		{
-			resetScene(ship_, gameObjects_);
+			//resetScene(ship_, gameObjects_);
 		}
 	}
 
@@ -214,22 +270,15 @@ public:
 		{
 			double convertedXPos = converter_.convertedXPos(xPos_);
 			double convertedYPos = converter_.convertedYPos(yPos_);
-		
+
 			glm::vec3 centreOfShipToClickedPosition = { convertedXPos - ship_.position[0], convertedYPos - ship_.position[1], 0 };
 
 			float arcTanClickAngle = atan(centreOfShipToClickedPosition[1] / centreOfShipToClickedPosition[0]);
 			float clickAngleFromXAxis = findAngleFromXAxisBasedOnQuadrants(centreOfShipToClickedPosition, arcTanClickAngle);
-			float angleDiff = clickAngleFromXAxis - ship_.theta;
+			float clickAngleFromVertical = clickAngleFromXAxis - PI/2;
 
-			ship_.numRotations = 150.f;
-			if (abs(angleDiff) > PI)
-			{
-				clickAngleFromXAxis = clickAngleFromXAxis - (2 * PI);
-				angleDiff = angleDiff - (2 * PI);
-			}
-
-			ship_.rotationFinishAngle = clickAngleFromXAxis;
-			ship_.rotationIncrement = angleDiff / ship_.numRotations;
+			ship_.theta = clickAngleFromVertical;
+			animatingARotation = true;
 		}
 	}
 
@@ -246,42 +295,7 @@ private:
 	double yPos_;
 };
 
-CPU_Geometry shipGeom(float width, float height, float xOffset, float yOffset) {
-	float halfWidth = width / 2.0f;
-	float halfHeight = height / 2.0f;
-	CPU_Geometry retGeom;
-	// vertices for the spaceship quad
-	retGeom.verts.push_back(glm::vec3(-halfWidth + xOffset, halfHeight + yOffset, 0.f));
-	retGeom.verts.push_back(glm::vec3(-halfWidth + xOffset, -halfHeight + yOffset, 0.f));
-	retGeom.verts.push_back(glm::vec3(halfWidth + xOffset, -halfHeight + yOffset, 0.f));
-	retGeom.verts.push_back(glm::vec3(-halfWidth + xOffset, halfHeight + yOffset, 0.f));
-	retGeom.verts.push_back(glm::vec3(halfWidth + xOffset, -halfHeight + yOffset, 0.f));
-	retGeom.verts.push_back(glm::vec3(halfWidth + xOffset, halfHeight + yOffset, 0.f));
-
-	// For full marks (Part IV), you'll need to use the following vertex coordinates instead.
-	// Then, you'd get the correct scale/translation/rotation by passing in uniforms into
-	// the vertex shader.
-	/*
-	retGeom.verts.push_back(glm::vec3(-1.f, 1.f, 0.f));
-	retGeom.verts.push_back(glm::vec3(-1.f, -1.f, 0.f));
-	retGeom.verts.push_back(glm::vec3(1.f, -1.f, 0.f));
-	retGeom.verts.push_back(glm::vec3(-1.f, 1.f, 0.f));
-	retGeom.verts.push_back(glm::vec3(1.f, -1.f, 0.f));
-	retGeom.verts.push_back(glm::vec3(1.f, 1.f, 0.f));
-	*/
-
-	// texture coordinates
-	retGeom.texCoords.push_back(glm::vec2(0.f, 1.f));
-	retGeom.texCoords.push_back(glm::vec2(0.f, 0.f));
-	retGeom.texCoords.push_back(glm::vec2(1.f, 0.f));
-	retGeom.texCoords.push_back(glm::vec2(0.f, 1.f));
-	retGeom.texCoords.push_back(glm::vec2(1.f, 0.f));
-	retGeom.texCoords.push_back(glm::vec2(1.f, 1.f));
-	return retGeom;
-}
-
-// END EXAMPLES
-void rotatePlayer(GameObject& ship)
+/*void rotatePlayer(GameObject& ship)
 {
 	if (ship.numRotations > 0)
 	{
@@ -313,9 +327,9 @@ void rotatePlayer(GameObject& ship)
 		ship.theta = currentIterationAngle;
 		ship.numRotations--;
 	}
-}
+}*/
 
-void checkForDiamondCollions(GameObject& ship, std::vector<GameObject*> gameObjects)
+/*void checkForDiamondCollions(GameObject& ship, std::vector<GameObject*> gameObjects)
 {
 	for (GameObject* gameObject : gameObjects)
 	{
@@ -329,7 +343,7 @@ void checkForDiamondCollions(GameObject& ship, std::vector<GameObject*> gameObje
 			}
 		}
 	}
-}
+}*/
 
 int main() {
 	Log::debug("Starting main");
@@ -346,39 +360,12 @@ int main() {
 
 	// GL_NEAREST looks a bit better for low-res pixel art than GL_LINEAR.
 	// But for most other cases, you'd want GL_LINEAR interpolation.
-	GameObject ship("textures/ship.png", GL_NEAREST);
-	ship.cgeom = shipGeom(0.18f, 0.12f, 0.f, 0.f);
-	ship.ggeom.setVerts(ship.cgeom.verts);
-	ship.ggeom.setTexCoords(ship.cgeom.texCoords);
-
-	GameObject diamond("textures/diamond.png", GL_NEAREST);
-	glm::vec3 diamondPosition = { 0.5f, 0.5f, 0.0f };
-	diamond.position = diamondPosition;
-	diamond.cgeom = shipGeom(0.18f, 0.12f, diamondPosition[0], diamondPosition[1]);
-	diamond.ggeom.setVerts(diamond.cgeom.verts);
-	diamond.ggeom.setTexCoords(diamond.cgeom.texCoords);
-
-	GameObject diamond2("textures/diamond.png", GL_NEAREST);
-	glm::vec3 diamond2Position = {-0.5f, 0.5f, 0.0f };
-	diamond2.position = diamond2Position;
-	diamond2.cgeom = shipGeom(0.18f, 0.12f, diamond2Position[0], diamond2Position[1]);
-	diamond2.ggeom.setVerts(diamond2.cgeom.verts);
-	diamond2.ggeom.setTexCoords(diamond2.cgeom.texCoords);
-
-	GameObject diamond3("textures/diamond.png", GL_NEAREST);
-	glm::vec3 diamond3Position = { 0.5f, -0.5f, 0.0f };
-	diamond3.position = diamond3Position;
-	diamond3.cgeom = shipGeom(0.18f, 0.12f, diamond3Position[0], diamond3Position[1]);
-	diamond3.ggeom.setVerts(diamond3.cgeom.verts);
-	diamond3.ggeom.setTexCoords(diamond3.cgeom.texCoords);
-
-	GameObject diamond4("textures/diamond.png", GL_NEAREST);
-	glm::vec3 diamond4Position = { -0.5f, -0.5f, 0.0f };
-	diamond4.position = diamond4Position;
-	diamond4.cgeom = shipGeom(0.18f, 0.12f, diamond4Position[0], diamond4Position[1]);
-	diamond4.ggeom.setVerts(diamond4.cgeom.verts);
-	diamond4.ggeom.setTexCoords(diamond4.cgeom.texCoords);
-
+	GameObject ship("textures/ship.png", GL_NEAREST, 0.5f, 0.5f);
+	GameObject diamond("textures/diamond.png", GL_NEAREST, 0.5f, 0.5f);
+	GameObject diamond2("textures/diamond.png", GL_NEAREST, -0.5f, 0.5f);
+	GameObject diamond3("textures/diamond.png", GL_NEAREST, 0.5f, -0.5f);
+	GameObject diamond4("textures/diamond.png", GL_NEAREST, -0.5f, -0.5f);
+	
 	std::vector<GameObject*> gameObjects;
 	gameObjects.push_back(&diamond);
 	gameObjects.push_back(&diamond2);
@@ -394,42 +381,65 @@ int main() {
 		int score = 0;
 		glfwPollEvents();
 
-		checkForDiamondCollions(ship, gameObjects);
+		//checkForDiamondCollions(ship, gameObjects);
 
 		shader.use();
-		rotatePlayer(ship);
+		//rotatePlayer(ship);
 		ship.ggeom.bind();
 
 		glEnable(GL_FRAMEBUFFER_SRGB);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		ship.texture.bind();
 
-		translationVector = ship.position;
-		rotationMatrix = {
-			{cos(ship.theta), -sin(ship.theta), 0.0f},
-			{sin(ship.theta), cos(ship.theta), 0.0f},
-			{0.f, 0.f, 0.f}
-		};
-		GLint translationVectorShaderVariable = glGetUniformLocation(shader.programId(), "translationVector");
-		glUniform3f(translationVectorShaderVariable, translationVector[0], translationVector[1], translationVector[2]);
 
+		//Setup Shader Uniforms for Ship
+		if (animatingARotation)
+		{
+			animationIncrement++;
+			float angleChange = ship.theta - ship.previousTheta;
+			float angleIncrement = angleChange * (animationIncrement / numAnimationFrames);
+			float rotationAngle = ship.previousTheta + angleIncrement;
+			ship.rotationMatrix = {
+				{cos(-rotationAngle), -sin(-rotationAngle), 0.0f, 0.0f},
+				{sin(-rotationAngle), cos(-rotationAngle), 0.0f, 0.0f},
+				{0.0f, 0.0f, 1.0f, 0.0f},
+				{0.0f, 0.0f, 0.0f, 1.0f}
+			};
+			std::cout << "Rotation Angle: " << rotationAngle * (180 / PI) << std::endl;
 
+			if (animationIncrement == numAnimationFrames)
+			{
+				ship.previousTheta = ship.theta;
+				animationIncrement = 0;
+				animatingARotation = false;
+			}
+		}
+		globalTransformationMatrix = ship.updateTransformationMatrix();
+		//std::cout << "Matrix: " << glm::to_string(globalTransformationMatrix) << std::endl;
+		GLint transformationMatrixShaderVariable = glGetUniformLocation(shader.programId(), "transformationMatrix");
+		glUniformMatrix4fv(transformationMatrixShaderVariable, 1, GL_FALSE, &globalTransformationMatrix[0][0]);
+
+		//Draw the ship
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		ship.texture.unbind();
-		translationVector = { 0.f, 0.f, 0.f };
-		rotationMatrix = {
-			{ 0.f, 0.f, 0.f },
-			{ 0.f, 0.f, 0.f },
-			{ 0.f, 0.f, 0.f }
-		};
-		glUniform3f(translationVectorShaderVariable, translationVector[0], translationVector[1], translationVector[2]);
 
-		for (GameObject* gameObject : gameObjects)
+
+		//Loop through diamonds, setting up a new shader uniform and then drawing the diamond on each loop
+		/*for (GameObject* gameObject : gameObjects)
 		{
+			//Only draw the diamond if it is marked visible
 			if (gameObject->isVisible)
 			{
 				gameObject->ggeom.bind();
 				gameObject->texture.bind();
+				//Can probably move this transformation matrix calculation into the diamond objects
+				transformationMatrix = {
+					{0.09f, 0.0f, 0.0f, gameObject->position[0]},
+					{0.0f, 0.06f, 0.0f, gameObject->position[1]},
+					{0.0f, 0.0f, 1.0f, 0.0f},
+					{0.0f, 0.0f, 0.0f, 1.0f}
+				};
+				glUniformMatrix3fv(transformationMatrixShaderVariable, 1, GL_FALSE, &transformationMatrix[0][0]);
 				glDrawArrays(GL_TRIANGLES, 0, 6);
 				gameObject->texture.unbind();
 			}
@@ -437,7 +447,7 @@ int main() {
 			{
 				score++;
 			}
-		}
+		}*/
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
