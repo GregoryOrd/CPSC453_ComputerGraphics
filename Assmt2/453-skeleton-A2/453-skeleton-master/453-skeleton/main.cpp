@@ -35,15 +35,25 @@ const float aspectRatioYFactor = 0.06f;
 const float defaultScalingFactor = 1.25;
 const float translationLength = 0.01f;
 const float collisionThreshold = 0.1f;
+const int diamondsNeededToWin = 4;
 
-//Global Variables used for Animation States
+//Global Variables used for Animation States and Game Logic
+int numDiamondsCollected = 0;
+
+//Ship Roation Animation
 bool animatingARotation = false;
 float animationIncrement = 0.0f;
-float numAnimationFrames = 60.0f;
+const float numAnimationFrames = 60.0f; //The larger this number, the slower the animation appears
+
+//Fire circling animation
 float fireAnimationAngle = 0.0f;
-float fireAnimationNumFrames = 3000.0f; //The larger this number, the slower the animation appears
-float fireAnimationIncrement = 2 * PI / fireAnimationNumFrames;
-int numDiamondsCollected = 0;
+const float fireAnimationNumFrames = 3000.0f; //The larger this number, the slower the animation appears
+const float fireAnimationIncrement = 2 * PI / fireAnimationNumFrames;
+
+//Diamonds rotating after winning animation
+float diamondAnimationAngle = 0.0f;
+const float diamondAnimationNumFrames = 2000.0f; //The larger this number, the slower the animation appears
+const float diamondAnimationIncrement = 2 * PI / diamondAnimationNumFrames;
 
 CPU_Geometry gameObjectGeometry() {
 	CPU_Geometry retGeom;
@@ -164,7 +174,7 @@ struct GameObject {
 		return transformationMatrix;
 	}
 
-	void addChild(GameObject* object, glm::vec3 childParentOffset)
+	GameObject& addChild(GameObject* object, glm::vec3 childParentOffset)
 	{
 		GameObject* child = object;
 
@@ -172,8 +182,10 @@ struct GameObject {
 		child->position = this->position;
 		child->offsetFromParent = glm::vec3(rotationMatrix * glm::vec4(childParentOffset, 1.0f));
 		child->updateTranslationMatrix();
+		child->updateTransformationMatrix();
 
 		children.push_back(child);
+		return *child;
 	}
 
 	void removeChildren()
@@ -394,12 +406,26 @@ private:
 	double yPos_;
 };
 
+void rotateChild(GameObject* child, float rotationAngle, glm::mat4 rotationMatrix)
+{
+	float offsetLength = glm::length(child->offsetFromParent);
+	child->offsetFromParent = { offsetLength * sin(rotationAngle), offsetLength * -cos(rotationAngle), 0.0f };
+	child->rotationMatrix = rotationMatrix;
+	child->updateTranslationMatrix();
+
+	for (GameObject* childsChild : child->children)
+	{
+		rotateChild(childsChild, rotationAngle, rotationMatrix);
+	}
+}
+
 void handleDiamondCollision(GameObject& ship, GameObject* diamond)
 {
 	numDiamondsCollected++;
 	diamond->setIsCollidable(false);
 	ship.scaleObject();
-	ship.addChild(diamond, (float)numDiamondsCollected * shipTrailingChildParentOffset);
+	GameObject& child = ship.addChild(diamond, (float)numDiamondsCollected * shipTrailingChildParentOffset);
+	rotateChild(&child, ship.theta, ship.rotationMatrix);
 }
 
 void checkForDiamondCollions(GameObject& ship, std::vector<GameObject*> diamonds)
@@ -431,16 +457,21 @@ void checkForFireCollions(GameObject& ship, std::vector<GameObject*>& diamonds, 
 	}
 }
 
-void rotateChild(GameObject* child, float rotationAngle, glm::mat4 rotationMatrix)
+void animateDiamondRotations(GameObject* diamond)
 {
-	float offsetLength = glm::length(child->offsetFromParent);
-	child->offsetFromParent = { offsetLength * sin(rotationAngle), offsetLength * -cos(rotationAngle), 0.0f };
-	child->rotationMatrix = rotationMatrix;
-	child->updateTranslationMatrix();
+	diamondAnimationAngle = diamondAnimationAngle + diamondAnimationIncrement;
 
-	for (GameObject* childsChild : child->children)
+	diamond->theta = diamondAnimationAngle;
+	diamond->rotationMatrix = {
+		{cos(diamondAnimationAngle), -sin(diamondAnimationAngle), 0.0f, 0.0f},
+		{sin(diamondAnimationAngle), cos(diamondAnimationAngle), 0.0f, 0.0f},
+		{0.0f, 0.0f, 1.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f, 1.0f}
+	};
+
+	if (diamondAnimationAngle == 2 * PI)
 	{
-		rotateChild(childsChild, rotationAngle, rotationMatrix);
+		diamondAnimationAngle = 0;
 	}
 }
 
@@ -525,31 +556,6 @@ int main() {
 	std::vector<GameObject*> diamonds;
 	std::vector<GameObject*> fires;
 	createAndAddDiamondsToGameObjectsList(diamonds, fires);
-	std::cout << "Diamonds.size(): " << diamonds.size() << " || Fires.size(): " << fires.size() << std::endl;
-	/*GameObject diamond1("textures/diamond.png", GL_NEAREST, 0.5f, 0.5f);
-	GameObject diamond2("textures/diamond.png", GL_NEAREST, -0.5f, 0.5f);
-	GameObject diamond3("textures/diamond.png", GL_NEAREST, 0.5f, -0.5f);
-	GameObject diamond4("textures/diamond.png", GL_NEAREST, -0.5f, -0.5f);
-
-	GameObject fire1("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
-	diamond1.addChild(&fire1, fireDiamondChildParentOffset);
-	GameObject fire2("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
-	diamond2.addChild(&fire2, fireDiamondChildParentOffset);
-	GameObject fire3("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
-	diamond3.addChild(&fire3, fireDiamondChildParentOffset);
-	GameObject fire4("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
-	diamond4.addChild(&fire4, fireDiamondChildParentOffset);
-	
-	diamonds.push_back(&diamond1);
-	diamonds.push_back(&diamond2);
-	diamonds.push_back(&diamond3);
-	diamonds.push_back(&diamond4);
-
-	std::vector<GameObject*> fires;
-	fires.push_back(&fire1);
-	fires.push_back(&fire2);
-	fires.push_back(&fire3);
-	fires.push_back(&fire4);*/
 
 	// CALLBACKS
 	CursorPositionConverter positionConverter(window);
@@ -572,6 +578,10 @@ int main() {
 		drawGameObject(ship, shader);
 		for (GameObject* diamond : diamonds)
 		{
+			if (numDiamondsCollected == diamondsNeededToWin)
+			{
+				animateDiamondRotations(diamond);
+			}
 			drawGameObject(*diamond, shader);
 
 			GameObject* fire = diamond->children[0];
@@ -605,7 +615,7 @@ int main() {
 		// Scale up text a little, and set its value
 		ImGui::SetWindowFontScale(1.5f);
 		ImGui::Text("Score: %d\n", numDiamondsCollected); // Second parameter gets passed into "%d"
-		if (numDiamondsCollected == 4)
+		if (numDiamondsCollected == diamondsNeededToWin)
 		{
 			ImGui::SetWindowFontScale(3.0f);
 			ImGui::Text("Congratulations!\nYou got all of the diamonds!\nYou won the game!");
