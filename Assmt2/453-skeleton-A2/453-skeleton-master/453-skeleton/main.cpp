@@ -30,6 +30,10 @@ glm::mat4 globalTransformationMatrix = {
 bool animatingARotation = false;
 float animationIncrement = 0.0f;
 float numAnimationFrames = 60.0f;
+float fireAnimationAngle = 0.0f;
+float fireAnimationNumFrames = 3000.0f; //The larger this number, the slower the animation appears
+float fireAnimationIncrement = 2 * PI / fireAnimationNumFrames;
+glm::vec3 fireDiamondChildParentOffset = { 0.15f, 0.15f, 0.0f };
 
 CPU_Geometry gameObjectGeometry() {
 	CPU_Geometry retGeom;
@@ -63,6 +67,7 @@ struct GameObject {
 	GameObject(std::string texturePath, GLenum textureInterpolation, float xPos, float yPos) :
 		texture(texturePath, textureInterpolation),
 		position(xPos, yPos, 0.0f),
+		offsetFromPosition(0.0f, 0.0f, 0.0f),
 		theta(0),
 		previousTheta(0),
 		scale(1),
@@ -97,13 +102,23 @@ struct GameObject {
 		ggeom.setTexCoords(cgeom.texCoords);
 	}
 
+	void scaleObject(float scalingFactor = 1.25, bool scaleUp = true)
+	{
+		if (!scaleUp)
+		{
+			scalingFactor = 1 / scalingFactor;
+		}
+		scale *= scalingFactor;
+		updateScalingMatrix();
+	}
+
 	void updateTranslationMatrix()
 	{
 		translationMatrix = {
 			{1.0f, 0.0f, 0.0f, 0.0f},
 			{0.0f, 1.0f, 0.0f, 0.0f},
 			{0.0f, 0.0f, 1.0f, 0.0f},
-			{position[0], position[1], 0.0f, 1.0f}
+			{position[0] + offsetFromPosition[0], position[1] + offsetFromPosition[1], 0.0f, 1.0f}
 		};
 	}
 
@@ -133,11 +148,24 @@ struct GameObject {
 		return transformationMatrix;
 	}
 
+	void setChild(GameObject* object, glm::vec3 childParentOffset)
+	{
+		child = object;
+
+		child->scaleObject(1.8, false);
+		child->position = this->position;
+		child->offsetFromPosition = childParentOffset;
+		child->updateTranslationMatrix();
+	}
+
+	GameObject* child;
+
 	CPU_Geometry cgeom;
 	GPU_Geometry ggeom;
 	Texture texture;
 
 	glm::vec3 position;
+	glm::vec3 offsetFromPosition;
 	float theta;
 	float previousTheta;
 	float scale;
@@ -150,19 +178,8 @@ struct GameObject {
 
 void rotatePlayerToOriginalPosition(GameObject& ship)
 {
-	ship.theta = PI / 2;
+	ship.theta = 0;
 	ship.updateRotationMatrixToDefault();
-}
-
-void scaleShip(GameObject& ship, bool scaleUp = true)
-{
-	float scalingFactor = 1.25;
-	if (!scaleUp)
-	{
-		scalingFactor = 1 / scalingFactor;
-	}
-	ship.scale *= scalingFactor;
-	ship.updateScalingMatrix();
 }
 
 class CursorPositionConverter
@@ -238,8 +255,9 @@ void resetScene(GameObject& ship, std::vector<GameObject*> gameObjects)
 	{
 		if (!gameObject->isVisible)
 		{
-			scaleShip(ship, false);
+			ship.scaleObject(1.25f, false);
 			gameObject->isVisible = true;
+			gameObject->child->isVisible = true;
 		}
 	}
 	rotatePlayerToOriginalPosition(ship);
@@ -354,7 +372,29 @@ void checkForDiamondCollions(GameObject& ship, std::vector<GameObject*> diamonds
 			if (distanceBetweenShipAndDiamond <= 0.1)
 			{
 				diamond->isVisible = false;
-				scaleShip(ship);
+				diamond->child->isVisible = false;
+				ship.scaleObject();
+			}
+		}
+	}
+}
+
+void checkForFireCollions(GameObject& ship, std::vector<GameObject*> diamonds)
+{
+	for (GameObject* diamond : diamonds)
+	{
+		GameObject* fire = diamond->child;
+
+		//fire->position is actually the diamond position, adding the rotated offsetFromPosition gives where the fire is actually drawn.
+		float offsetLength = glm::length(fire->offsetFromPosition);
+		glm::vec3 effectiveFirePosition = { fire->position[0] + offsetLength * cos(fire->theta), fire->position[1] + offsetLength * sin(fire->theta), 0.0f };
+		float distanceBetweenShipAndFire = glm::distance(ship.position, effectiveFirePosition);
+		if (fire->isVisible)
+		{
+			if (distanceBetweenShipAndFire <= 0.1)
+			{
+				std::cout << "Fire Collision" << std::endl;
+				resetScene(ship, diamonds);
 			}
 		}
 	}
@@ -384,6 +424,26 @@ void animateShipRotation(GameObject& ship)
 	}
 }
 
+void animateFire(GameObject& fire)
+{
+	fireAnimationAngle += fireAnimationIncrement;
+	fire.theta = fireAnimationAngle;
+	float offsetLength = glm::length(fire.offsetFromPosition);
+
+
+	fire.translationMatrix = {
+		{1.0f, 0.0f, 0.0f, 0.0f},
+		{0.0f, 1.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 1.0f, 0.0f},
+		{fire.position[0] + offsetLength*cos(fireAnimationAngle), fire.position[1] + offsetLength * sin(fireAnimationAngle), 0.0f, 1.0f}
+	};
+
+	if (fireAnimationAngle == 2 * PI)
+	{
+		fireAnimationAngle = 0;
+	}
+}
+
 void drawGameObject(GameObject& gameObject, ShaderProgram& shader)
 {
 	gameObject.ggeom.bind();
@@ -391,7 +451,10 @@ void drawGameObject(GameObject& gameObject, ShaderProgram& shader)
 	globalTransformationMatrix = gameObject.updateTransformationMatrix();
 	GLint transformationMatrixShaderVariable = glGetUniformLocation(shader.programId(), "transformationMatrix");
 	glUniformMatrix4fv(transformationMatrixShaderVariable, 1, GL_FALSE, &globalTransformationMatrix[0][0]);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	if (gameObject.isVisible)
+	{
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
 	gameObject.texture.unbind();
 }
 
@@ -411,16 +474,32 @@ int main() {
 	// GL_NEAREST looks a bit better for low-res pixel art than GL_LINEAR.
 	// But for most other cases, you'd want GL_LINEAR interpolation.
 	GameObject ship("textures/ship.png", GL_NEAREST, 0.0f, 0.0f);
+
 	GameObject diamond1("textures/diamond.png", GL_NEAREST, 0.5f, 0.5f);
 	GameObject diamond2("textures/diamond.png", GL_NEAREST, -0.5f, 0.5f);
 	GameObject diamond3("textures/diamond.png", GL_NEAREST, 0.5f, -0.5f);
 	GameObject diamond4("textures/diamond.png", GL_NEAREST, -0.5f, -0.5f);
+
+	GameObject fire1("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
+	diamond1.setChild(&fire1, fireDiamondChildParentOffset);
+	GameObject fire2("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
+	diamond2.setChild(&fire2, fireDiamondChildParentOffset);
+	GameObject fire3("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
+	diamond3.setChild(&fire3, fireDiamondChildParentOffset);
+	GameObject fire4("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
+	diamond4.setChild(&fire4, fireDiamondChildParentOffset);
 	
 	std::vector<GameObject*> diamonds;
 	diamonds.push_back(&diamond1);
 	diamonds.push_back(&diamond2);
 	diamonds.push_back(&diamond3);
 	diamonds.push_back(&diamond4);
+
+	std::vector<GameObject*> fires;
+	fires.push_back(&fire1);
+	fires.push_back(&fire2);
+	fires.push_back(&fire3);
+	fires.push_back(&fire4);
 
 	// CALLBACKS
 	CursorPositionConverter positionConverter(window);
@@ -432,9 +511,9 @@ int main() {
 		glfwPollEvents();
 
 		checkForDiamondCollions(ship, diamonds);
+		checkForFireCollions(ship, diamonds);
 
 		shader.use();
-		//rotatePlayer(ship);
 
 		glEnable(GL_FRAMEBUFFER_SRGB);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -444,15 +523,17 @@ int main() {
 		drawGameObject(ship, shader);
 		for (GameObject* diamond : diamonds)
 		{
-			//Only draw the diamond if it is marked visible
-			if (diamond->isVisible)
-			{
-				drawGameObject(*diamond, shader);
-			}
-			else
+			drawGameObject(*diamond, shader);
+			if (!diamond->isVisible)
 			{
 				score++;
 			}
+		}
+
+		for (GameObject* fire : fires)
+		{
+			animateFire(*fire);
+			drawGameObject(*fire, shader);
 		}
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
