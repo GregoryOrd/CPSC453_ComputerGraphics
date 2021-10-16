@@ -287,6 +287,11 @@ public:
 			float clickAngleFromXAxis = findAngleFromXAxisBasedOnQuadrants(centreOfShipToClickedPosition, arcTanClickAngle);
 			float clickAngleFromVertical = clickAngleFromXAxis - PI/2;
 
+			if (abs(clickAngleFromVertical - ship_.theta) > PI)
+			{
+				clickAngleFromVertical = -(2 * PI - clickAngleFromVertical);
+			}
+
 			ship_.theta = clickAngleFromVertical;
 			animatingARotation = true;
 		}
