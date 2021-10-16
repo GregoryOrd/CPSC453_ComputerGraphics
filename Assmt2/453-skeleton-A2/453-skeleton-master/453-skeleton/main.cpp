@@ -26,6 +26,7 @@ glm::mat4 globalTransformationMatrix = {
 	{0.0f, 0.0f, 0.0f, 1.0f}
 };
 
+//State used to animate the rotations of the ship
 bool animatingARotation = false;
 float animationIncrement = 0.0f;
 float numAnimationFrames = 60.0f;
@@ -43,7 +44,6 @@ CPU_Geometry gameObjectGeometry() {
 	retGeom.verts.push_back(glm::vec3(-1.f, 1.f, 0.f));
 	retGeom.verts.push_back(glm::vec3(1.f, -1.f, 0.f));
 	retGeom.verts.push_back(glm::vec3(1.f, 1.f, 0.f));
-
 
 	// texture coordinates
 	retGeom.texCoords.push_back(glm::vec2(0.f, 1.f));
@@ -97,6 +97,36 @@ struct GameObject {
 		ggeom.setTexCoords(cgeom.texCoords);
 	}
 
+	void updateTranslationMatrix()
+	{
+		translationMatrix = {
+			{1.0f, 0.0f, 0.0f, 0.0f},
+			{0.0f, 1.0f, 0.0f, 0.0f},
+			{0.0f, 0.0f, 1.0f, 0.0f},
+			{position[0], position[1], 0.0f, 1.0f}
+		};
+	}
+
+	void updateRotationMatrixToDefault()
+	{
+		rotationMatrix = {
+			{1.0f, 0.0f, 0.0f, 0.0f},
+			{0.0f, 1.0f, 0.0f, 0.0f},
+			{0.0f, 0.0f, 1.0f, 0.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f}
+		};
+	}
+
+	void updateScalingMatrix()
+	{
+		scalingMatrix = {
+			{scale * 0.09f, 0.0f, 0.0f, 0.0f},
+			{0.0f, scale * 0.06f, 0.0f, 0.0f},
+			{0.0f, 0.0f, 1.0f, 0.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f}
+		};
+	}
+
 	glm::mat4 updateTransformationMatrix()
 	{
 		transformationMatrix = translationMatrix * rotationMatrix * scalingMatrix;
@@ -118,33 +148,11 @@ struct GameObject {
 	bool isVisible;
 };
 
-/*void rotatePlayerToOriginalPosition(GameObject& ship)
+void rotatePlayerToOriginalPosition(GameObject& ship)
 {
-	glm::mat3 rotationToXAxis = {
-		{cos(ship.theta), -sin(ship.theta), 0.0f},
-		{sin(ship.theta), cos(ship.theta), 0.0f},
-		{0.f, 0.f, 0.f}
-	};
-
-	glm::mat3 rotationToOriginalPosition = {
-		{cos(-PI / 2), -sin(-PI / 2), 0.0f},
-		{sin(-PI / 2), cos(-PI / 2), 0.0f},
-		{0.f, 0.f, 0.f}
-	};
-
-	std::vector<glm::vec3> newVerts;
-	for (glm::vec3 vert : ship.cgeom.verts)
-	{
-		vert = vert - ship.position; //Translate to the origin
-		vert = rotationToOriginalPosition * rotationToXAxis * vert; //Rotate about the origin
-		vert = vert + ship.position; //Translate back to the ship position
-		newVerts.push_back(vert);
-	}
-
-	ship.cgeom.verts = newVerts;
-	ship.ggeom.setVerts(newVerts);
 	ship.theta = PI / 2;
-}*/
+	ship.updateRotationMatrixToDefault();
+}
 
 void scaleShip(GameObject& ship, bool scaleUp = true)
 {
@@ -154,6 +162,7 @@ void scaleShip(GameObject& ship, bool scaleUp = true)
 		scalingFactor = 1 / scalingFactor;
 	}
 	ship.scale *= scalingFactor;
+	ship.updateScalingMatrix();
 }
 
 class CursorPositionConverter
@@ -219,9 +228,10 @@ void translateShip(GameObject& ship, float xIncrement, float yIncrement)
 	float translationLength = 0.01f;
 	glm::vec3 translation = { translationLength * xIncrement, translationLength * yIncrement, 0.0f };
 	ship.position = ship.position + translation;
+	ship.updateTranslationMatrix();
 }
 
-/*void resetScene(GameObject& ship, std::vector<GameObject*> gameObjects)
+void resetScene(GameObject& ship, std::vector<GameObject*> gameObjects)
 {
 	translateShip(ship, -100*ship.position[0], -100*ship.position[1]);
 	for (GameObject* gameObject : gameObjects)
@@ -233,7 +243,7 @@ void translateShip(GameObject& ship, float xIncrement, float yIncrement)
 		}
 	}
 	rotatePlayerToOriginalPosition(ship);
-}*/
+}
 
 float normalizedAngle(float angle)
 {
@@ -253,15 +263,15 @@ public:
 	{
 		if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			//translateShip(ship_, cos(ship_.theta), sin(ship_.theta));
+			translateShip(ship_, cos(ship_.theta + PI/2), sin(ship_.theta + PI / 2));
 		}
 		else if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
-			//translateShip(ship_, -cos(ship_.theta), -sin(ship_.theta));
+			translateShip(ship_, -cos(ship_.theta + PI / 2), -sin(ship_.theta + PI / 2));
 		}
 		else if (key == GLFW_KEY_R && action == GLFW_PRESS)
 		{
-			//resetScene(ship_, gameObjects_);
+			resetScene(ship_, gameObjects_);
 		}
 	}
 
@@ -329,21 +339,56 @@ private:
 	}
 }*/
 
-/*void checkForDiamondCollions(GameObject& ship, std::vector<GameObject*> gameObjects)
+void checkForDiamondCollions(GameObject& ship, std::vector<GameObject*> diamonds)
 {
-	for (GameObject* gameObject : gameObjects)
+	for (GameObject* diamond : diamonds)
 	{
-		float distanceBetweenShipAndObject = glm::distance(ship.position, gameObject->position);
-		if (gameObject->isVisible)
+		float distanceBetweenShipAndDiamond = glm::distance(ship.position, diamond->position);
+		if (diamond->isVisible)
 		{
-			if (distanceBetweenShipAndObject <= 0.1)
+			if (distanceBetweenShipAndDiamond <= 0.1)
 			{
-				gameObject->isVisible = false;
+				diamond->isVisible = false;
 				scaleShip(ship);
 			}
 		}
 	}
-}*/
+}
+
+void animateShipRotation(GameObject& ship)
+{
+	if (animatingARotation)
+	{
+		animationIncrement++;
+		float angleChange = ship.theta - ship.previousTheta;
+		float angleIncrement = angleChange * (animationIncrement / numAnimationFrames);
+		float rotationAngle = ship.previousTheta + angleIncrement;
+		ship.rotationMatrix = {
+			{cos(-rotationAngle), -sin(-rotationAngle), 0.0f, 0.0f},
+			{sin(-rotationAngle), cos(-rotationAngle), 0.0f, 0.0f},
+			{0.0f, 0.0f, 1.0f, 0.0f},
+			{0.0f, 0.0f, 0.0f, 1.0f}
+		};
+
+		if (animationIncrement == numAnimationFrames)
+		{
+			ship.previousTheta = ship.theta;
+			animationIncrement = 0;
+			animatingARotation = false;
+		}
+	}
+}
+
+void drawGameObject(GameObject& gameObject, ShaderProgram& shader)
+{
+	gameObject.ggeom.bind();
+	gameObject.texture.bind();
+	globalTransformationMatrix = gameObject.updateTransformationMatrix();
+	GLint transformationMatrixShaderVariable = glGetUniformLocation(shader.programId(), "transformationMatrix");
+	glUniformMatrix4fv(transformationMatrixShaderVariable, 1, GL_FALSE, &globalTransformationMatrix[0][0]);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	gameObject.texture.unbind();
+}
 
 int main() {
 	Log::debug("Starting main");
@@ -360,94 +405,50 @@ int main() {
 
 	// GL_NEAREST looks a bit better for low-res pixel art than GL_LINEAR.
 	// But for most other cases, you'd want GL_LINEAR interpolation.
-	GameObject ship("textures/ship.png", GL_NEAREST, 0.5f, 0.5f);
-	GameObject diamond("textures/diamond.png", GL_NEAREST, 0.5f, 0.5f);
+	GameObject ship("textures/ship.png", GL_NEAREST, 0.0f, 0.0f);
+	GameObject diamond1("textures/diamond.png", GL_NEAREST, 0.5f, 0.5f);
 	GameObject diamond2("textures/diamond.png", GL_NEAREST, -0.5f, 0.5f);
 	GameObject diamond3("textures/diamond.png", GL_NEAREST, 0.5f, -0.5f);
 	GameObject diamond4("textures/diamond.png", GL_NEAREST, -0.5f, -0.5f);
 	
-	std::vector<GameObject*> gameObjects;
-	gameObjects.push_back(&diamond);
-	gameObjects.push_back(&diamond2);
-	gameObjects.push_back(&diamond3);
-	gameObjects.push_back(&diamond4);
+	std::vector<GameObject*> diamonds;
+	diamonds.push_back(&diamond1);
+	diamonds.push_back(&diamond2);
+	diamonds.push_back(&diamond3);
+	diamonds.push_back(&diamond4);
 
 	// CALLBACKS
 	CursorPositionConverter positionConverter(window);
-	window.setCallbacks(std::make_shared<MyCallbacks>(ship, gameObjects, positionConverter)); // can also update callbacks to new ones
+	window.setCallbacks(std::make_shared<MyCallbacks>(ship, diamonds, positionConverter)); // can also update callbacks to new ones
 
 	// RENDER LOOP
 	while (!window.shouldClose()) {
 		int score = 0;
 		glfwPollEvents();
 
-		//checkForDiamondCollions(ship, gameObjects);
+		checkForDiamondCollions(ship, diamonds);
 
 		shader.use();
 		//rotatePlayer(ship);
-		ship.ggeom.bind();
 
 		glEnable(GL_FRAMEBUFFER_SRGB);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		ship.texture.bind();
 
+		animateShipRotation(ship);
 
-		//Setup Shader Uniforms for Ship
-		if (animatingARotation)
-		{
-			animationIncrement++;
-			float angleChange = ship.theta - ship.previousTheta;
-			float angleIncrement = angleChange * (animationIncrement / numAnimationFrames);
-			float rotationAngle = ship.previousTheta + angleIncrement;
-			ship.rotationMatrix = {
-				{cos(-rotationAngle), -sin(-rotationAngle), 0.0f, 0.0f},
-				{sin(-rotationAngle), cos(-rotationAngle), 0.0f, 0.0f},
-				{0.0f, 0.0f, 1.0f, 0.0f},
-				{0.0f, 0.0f, 0.0f, 1.0f}
-			};
-			std::cout << "Rotation Angle: " << rotationAngle * (180 / PI) << std::endl;
-
-			if (animationIncrement == numAnimationFrames)
-			{
-				ship.previousTheta = ship.theta;
-				animationIncrement = 0;
-				animatingARotation = false;
-			}
-		}
-		globalTransformationMatrix = ship.updateTransformationMatrix();
-		//std::cout << "Matrix: " << glm::to_string(globalTransformationMatrix) << std::endl;
-		GLint transformationMatrixShaderVariable = glGetUniformLocation(shader.programId(), "transformationMatrix");
-		glUniformMatrix4fv(transformationMatrixShaderVariable, 1, GL_FALSE, &globalTransformationMatrix[0][0]);
-
-		//Draw the ship
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		ship.texture.unbind();
-
-
-		//Loop through diamonds, setting up a new shader uniform and then drawing the diamond on each loop
-		/*for (GameObject* gameObject : gameObjects)
+		drawGameObject(ship, shader);
+		for (GameObject* diamond : diamonds)
 		{
 			//Only draw the diamond if it is marked visible
-			if (gameObject->isVisible)
+			if (diamond->isVisible)
 			{
-				gameObject->ggeom.bind();
-				gameObject->texture.bind();
-				//Can probably move this transformation matrix calculation into the diamond objects
-				transformationMatrix = {
-					{0.09f, 0.0f, 0.0f, gameObject->position[0]},
-					{0.0f, 0.06f, 0.0f, gameObject->position[1]},
-					{0.0f, 0.0f, 1.0f, 0.0f},
-					{0.0f, 0.0f, 0.0f, 1.0f}
-				};
-				glUniformMatrix3fv(transformationMatrixShaderVariable, 1, GL_FALSE, &transformationMatrix[0][0]);
-				glDrawArrays(GL_TRIANGLES, 0, 6);
-				gameObject->texture.unbind();
+				drawGameObject(*diamond, shader);
 			}
 			else
 			{
 				score++;
 			}
-		}*/
+		}
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
