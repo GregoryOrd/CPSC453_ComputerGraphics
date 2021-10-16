@@ -27,9 +27,14 @@ glm::mat4 globalTransformationMatrix = {
 };
 
 //Constant Values
-glm::vec3 fireDiamondChildParentOffset = { 0.1f, 0.1f, 0.0f };
-glm::vec3 shipTrailingChildParentOffset = { 0.0f, -0.3f, 0.0f };
-float childScaleDownFactor = 2.0f;
+const glm::vec3 fireDiamondChildParentOffset = { 0.1f, 0.1f, 0.0f };
+const glm::vec3 shipTrailingChildParentOffset = { 0.0f, -0.3f, 0.0f };
+const float childScaleDownFactor = 2.0f;
+const float aspectRatioXFactor = 0.09f;
+const float aspectRatioYFactor = 0.06f;
+const float defaultScalingFactor = 1.25;
+const float translationLength = 0.01f;
+const float collisionThreshold = 0.1f;
 
 //Global Variables used for Animation States
 bool animatingARotation = false;
@@ -80,8 +85,8 @@ struct GameObject {
 		isCollidable(true)
 	{
 		scalingMatrix = {
-			{scale * 0.09f, 0.0f, 0.0f, 0.0f},
-			{0.0f, scale * 0.06f, 0.0f, 0.0f},
+			{scale * aspectRatioXFactor, 0.0f, 0.0f, 0.0f},
+			{0.0f, scale * aspectRatioYFactor, 0.0f, 0.0f},
 			{0.0f, 0.0f, 1.0f, 0.0f},
 			{0.0f, 0.0f, 0.0f, 1.0f}
 		};
@@ -107,7 +112,7 @@ struct GameObject {
 		ggeom.setTexCoords(cgeom.texCoords);
 	}
 
-	void scaleObject(float scalingFactor = 1.25, bool scaleUp = true)
+	void scaleObject(float scalingFactor = defaultScalingFactor, bool scaleUp = true)
 	{
 		if (!scaleUp)
 		{
@@ -146,8 +151,8 @@ struct GameObject {
 	void updateScalingMatrix()
 	{
 		scalingMatrix = {
-			{scale * 0.09f, 0.0f, 0.0f, 0.0f},
-			{0.0f, scale * 0.06f, 0.0f, 0.0f},
+			{scale * aspectRatioXFactor, 0.0f, 0.0f, 0.0f},
+			{0.0f, scale * aspectRatioYFactor, 0.0f, 0.0f},
 			{0.0f, 0.0f, 1.0f, 0.0f},
 			{0.0f, 0.0f, 0.0f, 1.0f}
 		};
@@ -169,6 +174,20 @@ struct GameObject {
 		child->updateTranslationMatrix();
 
 		children.push_back(child);
+	}
+
+	void removeChildren()
+	{
+		children.clear();
+	}
+
+	void setIsCollidable(bool)
+	{
+		isCollidable = false;
+		for (GameObject* child : children)
+		{
+			child->isCollidable = false;
+		}
 	}
 
 	std::vector<GameObject*> children;
@@ -255,7 +274,6 @@ float findAngleFromXAxisBasedOnQuadrants(glm::vec3 centreOfShipToClickedPosition
 
 void translateObject(GameObject& object, float xIncrement, float yIncrement)
 {
-	float translationLength = 0.01f;
 	glm::vec3 translation = { translationLength * xIncrement, translationLength * yIncrement, 0.0f };
 	object.position = object.position + translation;
 	object.updateTranslationMatrix();
@@ -266,23 +284,48 @@ void translateObject(GameObject& object, float xIncrement, float yIncrement)
 	}
 }
 
-void resetScene(GameObject& ship, std::vector<GameObject*> gameObjects)
+void createAndAddDiamondsToGameObjectsList(std::vector<GameObject*>& diamonds, std::vector<GameObject*>& fires)
+{
+	GameObject* diamond1 = new GameObject("textures/diamond.png", GL_NEAREST, 0.5f, 0.5f);
+	GameObject* diamond2 = new GameObject("textures/diamond.png", GL_NEAREST, -0.5f, 0.5f);
+	GameObject* diamond3 = new GameObject("textures/diamond.png", GL_NEAREST, 0.5f, -0.5f);
+	GameObject* diamond4 = new GameObject("textures/diamond.png", GL_NEAREST, -0.5f, -0.5f);
+
+	GameObject* fire1 = new GameObject("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
+	GameObject* fire2 = new GameObject("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
+	GameObject* fire3 = new GameObject("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
+	GameObject* fire4 = new GameObject("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
+
+	diamond1->addChild(fire1, fireDiamondChildParentOffset);
+	diamond2->addChild(fire2, fireDiamondChildParentOffset);
+	diamond3->addChild(fire3, fireDiamondChildParentOffset);
+	diamond4->addChild(fire4, fireDiamondChildParentOffset);
+
+	diamonds.push_back(diamond1);
+	diamonds.push_back(diamond2);
+	diamonds.push_back(diamond3);
+	diamonds.push_back(diamond4);
+
+	fires.push_back(fire1);
+	fires.push_back(fire2);
+	fires.push_back(fire3);
+	fires.push_back(fire4);
+}
+
+void resetScene(GameObject& ship, std::vector<GameObject*>& diamonds, std::vector<GameObject*>& fires)
 {
 	translateObject(ship, -100*ship.position[0], -100*ship.position[1]);
-	for (GameObject* gameObject : gameObjects)
+	for (int i = 0; i < numDiamondsCollected; i++)
 	{
-		if (!gameObject->isCollidable)
-		{
-			ship.scaleObject(1.25f, false);
-			gameObject->isCollidable = true;
-			for (GameObject* child : gameObject->children)
-			{
-				child->isCollidable = true;
-			}
-		}
+		ship.scaleObject(defaultScalingFactor, false);
 	}
+
 	rotatePlayerToOriginalPosition(ship);
 	numDiamondsCollected = 0;
+	ship.removeChildren();
+	diamonds.clear();
+	fires.clear();
+	createAndAddDiamondsToGameObjectsList(diamonds, fires);
 }
 
 float normalizedAngle(float angle)
@@ -297,7 +340,7 @@ float normalizedAngle(float angle)
 class MyCallbacks : public CallbackInterface {
 
 public:
-	MyCallbacks(GameObject& ship, std::vector<GameObject*> gameObjects, CursorPositionConverter& converter) : ship_(ship), gameObjects_(gameObjects), converter_(converter), xPos_(0), yPos_(0) {}
+	MyCallbacks(GameObject& ship, std::vector<GameObject*>& diamonds, std::vector<GameObject*>& fires, CursorPositionConverter& converter) : ship_(ship), diamonds_(diamonds), fires_(fires), converter_(converter), xPos_(0), yPos_(0) {}
 
 	virtual void keyCallback(int key, int scancode, int action, int mods)
 	{
@@ -311,7 +354,7 @@ public:
 		}
 		else if (key == GLFW_KEY_R && action == GLFW_PRESS)
 		{
-			resetScene(ship_, gameObjects_);
+			resetScene(ship_, diamonds_, fires_);
 		}
 	}
 
@@ -344,84 +387,46 @@ public:
 
 private:
 	GameObject& ship_;
-	std::vector<GameObject*> gameObjects_;
+	std::vector<GameObject*>& diamonds_;
+	std::vector<GameObject*>& fires_;
 	CursorPositionConverter& converter_;
 	double xPos_;
 	double yPos_;
 };
 
-/*void rotatePlayer(GameObject& ship)
+void handleDiamondCollision(GameObject& ship, GameObject* diamond)
 {
-	if (ship.numRotations > 0)
-	{
-		glm::mat3 rotationToXAxis = {
-			{cos(ship.theta), -sin(ship.theta), 0.0f},
-			{sin(ship.theta), cos(ship.theta), 0.0f},
-			{0.f, 0.f, 0.f}
-		};
-
-		float currentIterationAngle = ship.rotationFinishAngle - (ship.numRotations * ship.rotationIncrement);
-
-		glm::mat3 rotationToIterationAngle = {
-			{cos(currentIterationAngle), sin(currentIterationAngle), 0.0f},
-			{sin(currentIterationAngle), -cos(currentIterationAngle), 0.0f},
-			{0.f, 0.f, 0.f}
-		};
-
-		std::vector<glm::vec3> newVerts;
-		for (glm::vec3 vert : ship.cgeom.verts)
-		{
-			vert = vert - ship.position; //Translate to the origin
-			vert = rotationToIterationAngle * rotationToXAxis * vert; //Rotate about the origin
-			vert = vert + ship.position; //Translate back to the ship position
-			newVerts.push_back(vert);
-		}
-
-		ship.cgeom.verts = newVerts;
-		ship.ggeom.setVerts(newVerts);
-		ship.theta = currentIterationAngle;
-		ship.numRotations--;
-	}
-}*/
+	numDiamondsCollected++;
+	diamond->setIsCollidable(false);
+	ship.scaleObject();
+	ship.addChild(diamond, (float)numDiamondsCollected * shipTrailingChildParentOffset);
+}
 
 void checkForDiamondCollions(GameObject& ship, std::vector<GameObject*> diamonds)
 {
 	for (GameObject* diamond : diamonds)
 	{
 		float distanceBetweenShipAndDiamond = glm::distance(ship.position, diamond->position);
-		if (diamond->isCollidable)
+		if (diamond->isCollidable && distanceBetweenShipAndDiamond <= collisionThreshold)
 		{
-			if (distanceBetweenShipAndDiamond <= 0.1)
-			{
-				numDiamondsCollected++;
-				diamond->isCollidable = false;
-				for (GameObject* child : diamond->children)
-				{
-					child->isCollidable = false;
-				}
-				ship.scaleObject();
-				ship.addChild(diamond, (float)numDiamondsCollected * shipTrailingChildParentOffset);
-			}
+			handleDiamondCollision(ship, diamond);
 		}
 	}
 }
 
-void checkForFireCollions(GameObject& ship, std::vector<GameObject*> diamonds)
+void checkForFireCollions(GameObject& ship, std::vector<GameObject*>& diamonds, std::vector<GameObject*>& fires)
 {
 	for (GameObject* diamond : diamonds)
 	{
-		GameObject* fire = diamond->children[0];
-
 		//fire->position is actually the diamond position, adding the rotated offsetFromParent gives where the fire is actually drawn.
+		GameObject* fire = diamond->children[0];
 		float offsetLength = glm::length(fire->offsetFromParent);
 		glm::vec3 effectiveFirePosition = { fire->position[0] + offsetLength * cos(fire->theta), fire->position[1] + offsetLength * sin(fire->theta), 0.0f };
+
 		float distanceBetweenShipAndFire = glm::distance(ship.position, effectiveFirePosition);
-		if (fire->isCollidable)
+		if (fire->isCollidable && distanceBetweenShipAndFire <= collisionThreshold)
 		{
-			if (distanceBetweenShipAndFire <= 0.1)
-			{
-				resetScene(ship, diamonds);
-			}
+			resetScene(ship, diamonds, fires);
 		}
 	}
 }
@@ -517,8 +522,11 @@ int main() {
 	// GL_NEAREST looks a bit better for low-res pixel art than GL_LINEAR.
 	// But for most other cases, you'd want GL_LINEAR interpolation.
 	GameObject ship("textures/ship.png", GL_NEAREST, 0.0f, 0.0f);
-
-	GameObject diamond1("textures/diamond.png", GL_NEAREST, 0.5f, 0.5f);
+	std::vector<GameObject*> diamonds;
+	std::vector<GameObject*> fires;
+	createAndAddDiamondsToGameObjectsList(diamonds, fires);
+	std::cout << "Diamonds.size(): " << diamonds.size() << " || Fires.size(): " << fires.size() << std::endl;
+	/*GameObject diamond1("textures/diamond.png", GL_NEAREST, 0.5f, 0.5f);
 	GameObject diamond2("textures/diamond.png", GL_NEAREST, -0.5f, 0.5f);
 	GameObject diamond3("textures/diamond.png", GL_NEAREST, 0.5f, -0.5f);
 	GameObject diamond4("textures/diamond.png", GL_NEAREST, -0.5f, -0.5f);
@@ -532,7 +540,6 @@ int main() {
 	GameObject fire4("textures/fire.png", GL_NEAREST, 0.0f, 0.0f);
 	diamond4.addChild(&fire4, fireDiamondChildParentOffset);
 	
-	std::vector<GameObject*> diamonds;
 	diamonds.push_back(&diamond1);
 	diamonds.push_back(&diamond2);
 	diamonds.push_back(&diamond3);
@@ -542,18 +549,18 @@ int main() {
 	fires.push_back(&fire1);
 	fires.push_back(&fire2);
 	fires.push_back(&fire3);
-	fires.push_back(&fire4);
+	fires.push_back(&fire4);*/
 
 	// CALLBACKS
 	CursorPositionConverter positionConverter(window);
-	window.setCallbacks(std::make_shared<MyCallbacks>(ship, diamonds, positionConverter)); // can also update callbacks to new ones
+	window.setCallbacks(std::make_shared<MyCallbacks>(ship, diamonds, fires, positionConverter)); // can also update callbacks to new ones
 
 	// RENDER LOOP
 	while (!window.shouldClose()) {
 		glfwPollEvents();
 
 		checkForDiamondCollions(ship, diamonds);
-		checkForFireCollions(ship, diamonds);
+		checkForFireCollions(ship, diamonds, fires);
 
 		shader.use();
 
@@ -612,6 +619,11 @@ int main() {
 
 		window.swapBuffers();
 	}
+
+	//Cleanup Diamonds and Fires
+	diamonds.clear();
+	fires.clear();
+
 	// ImGui cleanup
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
