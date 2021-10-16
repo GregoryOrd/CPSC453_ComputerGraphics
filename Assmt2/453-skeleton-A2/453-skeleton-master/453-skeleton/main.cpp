@@ -39,6 +39,7 @@ const int diamondsNeededToWin = 4;
 
 //Global Variables used for Animation States and Game Logic
 int numDiamondsCollected = 0;
+bool gameOver = false;
 
 //Ship Roation Animation
 bool animatingARotation = false;
@@ -186,11 +187,6 @@ struct GameObject {
 		return *child;
 	}
 
-	void removeChildren()
-	{
-		children.clear();
-	}
-
 	void setIsCollidable(bool)
 	{
 		isCollidable = false;
@@ -294,7 +290,7 @@ void translateObject(GameObject& object, float xIncrement, float yIncrement)
 	}
 }
 
-void createAndAddDiamondsToGameObjectsList(std::vector<GameObject*>& diamonds, std::vector<GameObject*>& fires)
+void instantiateDefaultDiamondsAndFires(std::vector<GameObject*>& diamonds, std::vector<GameObject*>& fires)
 {
 	GameObject* diamond1 = new GameObject("textures/diamond.png", GL_NEAREST, 0.5f, 0.5f);
 	GameObject* diamond2 = new GameObject("textures/diamond.png", GL_NEAREST, -0.5f, 0.5f);
@@ -332,10 +328,10 @@ void resetScene(GameObject& ship, std::vector<GameObject*>& diamonds, std::vecto
 
 	rotatePlayerToOriginalPosition(ship);
 	numDiamondsCollected = 0;
-	ship.removeChildren();
+	gameOver = false;
 	diamonds.clear();
 	fires.clear();
-	createAndAddDiamondsToGameObjectsList(diamonds, fires);
+	instantiateDefaultDiamondsAndFires(diamonds, fires);
 }
 
 float normalizedAngle(float angle)
@@ -424,6 +420,10 @@ void handleDiamondCollision(GameObject& ship, GameObject* diamond)
 	ship.scaleObject();
 	GameObject& child = ship.addChild(diamond, (float)numDiamondsCollected * shipTrailingChildParentOffset);
 	rotateChild(&child, ship.theta, ship.rotationMatrix);
+	if (numDiamondsCollected == diamondsNeededToWin)
+	{
+		gameOver = true;
+	}
 }
 
 void checkForDiamondCollions(GameObject& ship, std::vector<GameObject*> diamonds)
@@ -553,7 +553,7 @@ int main() {
 	GameObject ship("textures/ship.png", GL_NEAREST, 0.0f, 0.0f);
 	std::vector<GameObject*> diamonds;
 	std::vector<GameObject*> fires;
-	createAndAddDiamondsToGameObjectsList(diamonds, fires);
+	instantiateDefaultDiamondsAndFires(diamonds, fires);
 
 	// CALLBACKS
 	CursorPositionConverter positionConverter(window);
@@ -571,12 +571,12 @@ int main() {
 		glEnable(GL_FRAMEBUFFER_SRGB);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		animateShipRotation(ship);
 
+		animateShipRotation(ship);
 		drawGameObject(ship, shader);
 		for (GameObject* diamond : diamonds)
 		{
-			if (numDiamondsCollected == diamondsNeededToWin)
+			if (gameOver)
 			{
 				animateDiamondRotations(diamond);
 			}
@@ -613,7 +613,7 @@ int main() {
 		// Scale up text a little, and set its value
 		ImGui::SetWindowFontScale(1.5f);
 		ImGui::Text("Score: %d\n", numDiamondsCollected); // Second parameter gets passed into "%d"
-		if (numDiamondsCollected == diamondsNeededToWin)
+		if (gameOver)
 		{
 			ImGui::SetWindowFontScale(3.0f);
 			ImGui::Text("Congratulations!\nYou got all of the diamonds!\nYou won the game!");
