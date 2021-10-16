@@ -181,8 +181,6 @@ struct GameObject {
 		child->scaleObject(childScaleDownFactor, false);
 		child->position = this->position;
 		child->offsetFromParent = glm::vec3(rotationMatrix * glm::vec4(childParentOffset, 1.0f));
-		child->updateTranslationMatrix();
-		child->updateTransformationMatrix();
 
 		children.push_back(child);
 		return *child;
