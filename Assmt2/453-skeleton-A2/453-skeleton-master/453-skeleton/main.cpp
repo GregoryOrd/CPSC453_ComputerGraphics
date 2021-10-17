@@ -350,11 +350,11 @@ public:
 
 	virtual void keyCallback(int key, int scancode, int action, int mods)
 	{
-		if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
+		if ((key == GLFW_KEY_UP || key == GLFW_KEY_W) && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
 			translateObject(ship_, cos(ship_.theta + PI/2), sin(ship_.theta + PI / 2));
 		}
-		else if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
+		else if ((key == GLFW_KEY_DOWN || key == GLFW_KEY_S) && (action == GLFW_PRESS || action == GLFW_REPEAT))
 		{
 			translateObject(ship_, -cos(ship_.theta + PI / 2), -sin(ship_.theta + PI / 2));
 		}
