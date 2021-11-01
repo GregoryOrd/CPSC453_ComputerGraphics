@@ -1,0 +1,205 @@
+[
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\453-skeleton\\GLDebug.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\453-skeleton\\GLDebug.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/453-skeleton/GLDebug.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\453-skeleton\\GLHandles.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\453-skeleton\\GLHandles.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/453-skeleton/GLHandles.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\453-skeleton\\Geometry.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\453-skeleton\\Geometry.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/453-skeleton/Geometry.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\453-skeleton\\Shader.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\453-skeleton\\Shader.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/453-skeleton/Shader.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\453-skeleton\\ShaderProgram.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\453-skeleton\\ShaderProgram.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/453-skeleton/ShaderProgram.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\453-skeleton\\Texture.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\453-skeleton\\Texture.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/453-skeleton/Texture.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\453-skeleton\\VertexArray.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\453-skeleton\\VertexArray.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/453-skeleton/VertexArray.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\453-skeleton\\VertexBuffer.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\453-skeleton\\VertexBuffer.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/453-skeleton/VertexBuffer.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\453-skeleton\\Window.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\453-skeleton\\Window.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/453-skeleton/Window.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\453-skeleton\\main.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\453-skeleton\\main.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/453-skeleton/main.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 /FoCMakeFiles\\453-skeleton.dir\\thirdparty\\glew-2.1.0\\src\\glew.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glew-2.1.0\\src\\glew.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glew-2.1.0/src/glew.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\thirdparty\\imgui-1.78\\imgui\\imgui.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\imgui-1.78\\imgui\\imgui.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/imgui-1.78/imgui/imgui.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\thirdparty\\imgui-1.78\\imgui\\imgui_demo.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\imgui-1.78\\imgui\\imgui_demo.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/imgui-1.78/imgui/imgui_demo.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\thirdparty\\imgui-1.78\\imgui\\imgui_draw.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\imgui-1.78\\imgui\\imgui_draw.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/imgui-1.78/imgui/imgui_draw.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\thirdparty\\imgui-1.78\\imgui\\imgui_impl_glfw.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\imgui-1.78\\imgui\\imgui_impl_glfw.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/imgui-1.78/imgui/imgui_impl_glfw.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\thirdparty\\imgui-1.78\\imgui\\imgui_impl_opengl3.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\imgui-1.78\\imgui\\imgui_impl_opengl3.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/imgui-1.78/imgui/imgui_impl_opengl3.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\src -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7 -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\stb-2.26 -I..\\..\\..\\thirdparty\\imgui-1.78  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   /permissive- /Zc:preprocessor /wd5105 /W3 -std:c++17 /FoCMakeFiles\\453-skeleton.dir\\thirdparty\\imgui-1.78\\imgui\\imgui_widgets.cpp.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\imgui-1.78\\imgui\\imgui_widgets.cpp",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/imgui-1.78/imgui/imgui_widgets.cpp"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\context.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\context.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/context.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\init.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\init.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/init.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\input.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\input.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/input.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\monitor.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\monitor.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/monitor.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\vulkan.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\vulkan.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/vulkan.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\window.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\window.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/window.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\win32_init.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\win32_init.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/win32_init.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\win32_joystick.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\win32_joystick.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/win32_joystick.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\win32_monitor.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\win32_monitor.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/win32_monitor.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\win32_time.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\win32_time.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/win32_time.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\win32_thread.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\win32_thread.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/win32_thread.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\win32_window.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\win32_window.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/win32_window.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\wgl_context.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\wgl_context.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/wgl_context.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\egl_context.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\egl_context.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/egl_context.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo -D_CRT_SECURE_NO_WARNINGS -D_GLFW_USE_CONFIG_H -D_UNICODE -I..\\..\\..\\thirdparty\\glfw-3.3.2\\include -I..\\..\\..\\thirdparty\\glfw-3.3.2\\src -Ithirdparty\\glfw-3.3.2\\src -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include  /DWIN32 /D_WINDOWS /Zi /Ob0 /Od /RTC1 -MDd   /Fothirdparty\\glfw-3.3.2\\src\\CMakeFiles\\glfw.dir\\osmesa_context.c.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\glfw-3.3.2\\src\\osmesa_context.c",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/glfw-3.3.2/src/osmesa_context.c"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   -std:c++17 /Fothirdparty\\fmt-7.0.3\\CMakeFiles\\fmt.dir\\src\\format.cc.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\fmt-7.0.3\\src\\format.cc",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/fmt-7.0.3/src/format.cc"
+},
+
+{
+  "directory": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/out/build/x64-Debug",
+  "command": "C:\\PROGRA~2\\MICROS~2\\2019\\COMMUN~1\\VC\\Tools\\MSVC\\1425~1.286\\bin\\HostX64\\x64\\cl.exe  /nologo /TP -DFMT_LOCALE -I..\\..\\..\\thirdparty\\fmt-7.0.3\\include -I..\\..\\..\\thirdparty\\argh-1.3.1 -I..\\..\\..\\thirdparty\\glew-2.1.0\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\include -I..\\..\\..\\thirdparty\\vivid-2.2.1\\dependencies\\glm -I..\\..\\..\\thirdparty\\glm-0.9.9.7  /DWIN32 /D_WINDOWS /GR /EHsc /Zi /Ob0 /Od /RTC1 -MDd   -std:c++17 /Fothirdparty\\fmt-7.0.3\\CMakeFiles\\fmt.dir\\src\\os.cc.obj /FdTARGET_COMPILE_PDB /FS -c C:\\CPSC453_ComputerGraphics\\Assmt2\\GregoryOrd_CPSC453_A2\\thirdparty\\fmt-7.0.3\\src\\os.cc",
+  "file": "C:/CPSC453_ComputerGraphics/Assmt2/GregoryOrd_CPSC453_A2/thirdparty/fmt-7.0.3/src/os.cc"
+}
+]
