@@ -99,15 +99,19 @@ public:
 	{
 		square_.verts.push_back({ convertedXPos(), convertedYPos(), 0.0f });
 		square_.cols.push_back(selectedColour);
-		selectedIndex_ = square_.verts.size();
+		selectedIndex_ = -1;
 		mouseDragging_ = false;
 	}
 
 	void updatePoints()
 	{
-		// Reset the colors to red
+		// Reset the colors to red, selected point to blue
 		square_.cols.clear();
 		square_.cols.resize(square_.verts.size(), glm::vec3{ 1.0, 0.0, 0.0 });
+		if (selectedIndex() != -1)
+		{
+			square_.cols.at(selectedIndex()) = glm::vec3{ 0.0f, 0.0f, 1.0f };
+		}
 		updateGPUGeometry(pointsGPUGeom_, square_);
 	}
 
@@ -226,18 +230,10 @@ void dragSelectedPoint(Assignment3& a3, CPU_Geometry& square, GPU_Geometry& poin
 		}
 
 		// Reset the points colors to red and selected to blue
-		square.cols.clear();
-		square.cols.resize(square.verts.size(), glm::vec3{ 1.0, 0.0, 0.0 });
-		if (a3.selectedIndex() != -1)
-		{
-			square.cols.at(a3.selectedIndex()) = glm::vec3{ 0.0f, 0.0f, 1.0f };
-		}
-		updateGPUGeometry(pointsGPUGeom, square);
+		a3.updatePoints();
 
 		// Reset the colors to green
-		square.cols.clear();
-		square.cols.resize(square.verts.size(), glm::vec3{ 0.0, 1.0, 0.0 });
-		updateGPUGeometry(linesGPUGeom, square);
+		a3.updateLines();
 	}
 }
 
