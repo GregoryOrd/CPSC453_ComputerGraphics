@@ -25,7 +25,8 @@
 
 const glm::vec3 selectedColour = { 0.f, 0.f, 1.0f };
 const glm::vec3 nonSelectedColour = { 1.f, 0.0f, 0.0f };
-const float collisionThreshold = 0.01;
+const float collisionThreshold = 0.01f;
+const int numBezierPoints = 1000;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry &gpuGeom, CPU_Geometry const &cpuGeom) {
@@ -69,8 +70,8 @@ private:
 class Assignment3 : public CallbackInterface {
 
 public:
-	Assignment3(CPU_Geometry& square, GPU_Geometry& pointsGPUGeom, GPU_Geometry& linesGPUGeom, CursorPositionConverter& converter, glm::vec3* selectedPoint)
-		: square_(square), pointsGPUGeom_(pointsGPUGeom), linesGPUGeom_(linesGPUGeom), converter_(converter), xPos_(0.f), yPos_(0.f), mouseDragging_(false), selectedIndex_(-1)
+	Assignment3(CPU_Geometry& square, CPU_Geometry& bezierCurve, GPU_Geometry& bezierGPUGeom, GPU_Geometry& pointsGPUGeom, GPU_Geometry& linesGPUGeom, CursorPositionConverter& converter, glm::vec3* selectedPoint)
+		: square_(square), bezierCurve_(bezierCurve), bezierGPUGeom_(bezierGPUGeom), pointsGPUGeom_(pointsGPUGeom), linesGPUGeom_(linesGPUGeom), converter_(converter), xPos_(0.f), yPos_(0.f), mouseDragging_(false), selectedIndex_(-1)
 	{
 	}
 
@@ -101,6 +102,11 @@ public:
 		square_.cols.push_back(selectedColour);
 		selectedIndex_ = -1;
 		mouseDragging_ = false;
+	}
+
+	void updateBezierCurve()
+	{
+		updateGPUGeometry(bezierGPUGeom_, bezierCurve_);
 	}
 
 	void updatePoints()
@@ -143,10 +149,14 @@ public:
 			square_.cols.clear();
 			square_.verts.clear();
 
+			bezierCurve_.cols.clear();
+			bezierCurve_.verts.clear();
+
 			selectedIndex_ = -1;
 
 			updatePoints();
 			updateLines();
+			updateBezierCurve();
 		}
 	}
 
@@ -209,6 +219,8 @@ private:
 	CPU_Geometry& square_;
 	GPU_Geometry& pointsGPUGeom_;
 	GPU_Geometry& linesGPUGeom_;
+	CPU_Geometry& bezierCurve_;
+	GPU_Geometry& bezierGPUGeom_;
 	float xPos_;
 	float yPos_;
 	int selectedIndex_;
@@ -237,6 +249,35 @@ void dragSelectedPoint(Assignment3& a3, CPU_Geometry& square, GPU_Geometry& poin
 	}
 }
 
+void deCasteljauBezierGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bezierCurve, GPU_Geometry& bezierGPUGeom)
+{
+	if (controlPointsGeom.verts.size() >= 2)
+	{
+		bezierCurve.verts.clear();
+		bezierCurve.cols.clear();
+
+		int degree = controlPointsGeom.verts.size() - 1;
+		std::vector<glm::vec3> intermediatePoints = controlPointsGeom.verts;
+
+
+		for (float u = 0; u < 1.0f; u += 1.0f / (float)numBezierPoints)
+		{
+			for (int i = 0; i < degree; i++)
+			{
+				for (int j = 0; j < degree - i; j++)
+				{
+					intermediatePoints[j] = (1-u)* intermediatePoints[j] + u* intermediatePoints[j+1];
+				}
+			}
+
+			bezierCurve.verts.push_back(intermediatePoints[0]);
+			bezierCurve.cols.push_back(glm::vec3{ 0.3f, 0.7f, 0.9f });
+		}
+
+		updateGPUGeometry(bezierGPUGeom, bezierCurve);
+	}
+}
+
 int main() {
 	Log::debug("Starting main");
 
@@ -248,14 +289,21 @@ int main() {
 	GLDebug::enable();
 
 	CPU_Geometry square;
+	CPU_Geometry bezierCurve;
 	GPU_Geometry pointsGPUGeom;
 	GPU_Geometry linesGPUGeom;
+	GPU_Geometry bezierGPUGeom;
 	glm::vec3* selectedPoint = new glm::vec3(0.0f, 0.0f, 0.0f);
+
+
+	bezierCurve.verts.resize(numBezierPoints, glm::vec3{ 0.0f, 0.0f, 0.0f });
+	bezierCurve.cols.resize(numBezierPoints, glm::vec3{ 0.3f, 0.7f, 0.9f });
+	updateGPUGeometry(bezierGPUGeom, bezierCurve);
 
 	bool isBezierCurve = true;
 
 	// CALLBACKS
-	auto a3 = std::make_shared<Assignment3>(square, pointsGPUGeom, linesGPUGeom, converter, selectedPoint);
+	auto a3 = std::make_shared<Assignment3>(square, bezierCurve, bezierGPUGeom, pointsGPUGeom, linesGPUGeom, converter, selectedPoint);
 	window.setCallbacks(a3);
 
 
@@ -272,11 +320,15 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		dragSelectedPoint(*a3, square, pointsGPUGeom, linesGPUGeom);
+		deCasteljauBezierGenerator(square, bezierCurve, bezierGPUGeom);
 
 		shader.use();
 
 		linesGPUGeom.bind();
 		glDrawArrays(GL_LINE_STRIP, 0, GLsizei(square.verts.size()));
+
+		bezierGPUGeom.bind();
+		glDrawArrays(GL_LINE_STRIP, 0, GLsizei(bezierCurve.verts.size()));
 
 		pointsGPUGeom.bind();
 		glDrawArrays(GL_POINTS, 0, GLsizei(square.verts.size()));
