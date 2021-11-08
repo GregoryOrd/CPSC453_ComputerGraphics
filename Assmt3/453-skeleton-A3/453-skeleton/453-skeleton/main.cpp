@@ -26,7 +26,8 @@
 const glm::vec3 selectedColour = { 0.f, 0.f, 1.0f };
 const glm::vec3 nonSelectedColour = { 1.f, 0.0f, 0.0f };
 const float collisionThreshold = 0.01f;
-const int numBezierPoints = 1000;
+const int numPointsOnGeneratedCurve = 1000;
+bool isBezierCurve = true;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry &gpuGeom, CPU_Geometry const &cpuGeom) {
@@ -70,8 +71,8 @@ private:
 class Assignment3 : public CallbackInterface {
 
 public:
-	Assignment3(CPU_Geometry& square, CPU_Geometry& bezierCurve, GPU_Geometry& bezierGPUGeom, GPU_Geometry& pointsGPUGeom, GPU_Geometry& linesGPUGeom, CursorPositionConverter& converter, glm::vec3* selectedPoint)
-		: square_(square), bezierCurve_(bezierCurve), bezierGPUGeom_(bezierGPUGeom), pointsGPUGeom_(pointsGPUGeom), linesGPUGeom_(linesGPUGeom), converter_(converter), xPos_(0.f), yPos_(0.f), mouseDragging_(false), selectedIndex_(-1)
+	Assignment3(CPU_Geometry& square, CPU_Geometry& generatedCurve, GPU_Geometry& generatedGPUGeom, GPU_Geometry& pointsGPUGeom, GPU_Geometry& linesGPUGeom, CursorPositionConverter& converter, glm::vec3* selectedPoint)
+		: square_(square), generatedCurve_(generatedCurve), generatedGPUGeom_(generatedGPUGeom), pointsGPUGeom_(pointsGPUGeom), linesGPUGeom_(linesGPUGeom), converter_(converter), xPos_(0.f), yPos_(0.f), mouseDragging_(false), selectedIndex_(-1)
 	{
 	}
 
@@ -104,9 +105,9 @@ public:
 		mouseDragging_ = false;
 	}
 
-	void updateBezierCurve()
+	void updateGeneratedCurve()
 	{
-		updateGPUGeometry(bezierGPUGeom_, bezierCurve_);
+		updateGPUGeometry(generatedGPUGeom_, generatedCurve_);
 	}
 
 	void updatePoints()
@@ -149,14 +150,18 @@ public:
 			square_.cols.clear();
 			square_.verts.clear();
 
-			bezierCurve_.cols.clear();
-			bezierCurve_.verts.clear();
+			generatedCurve_.cols.clear();
+			generatedCurve_.verts.clear();
 
 			selectedIndex_ = -1;
 
 			updatePoints();
 			updateLines();
-			updateBezierCurve();
+			updateGeneratedCurve();
+		}
+		else if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+		{
+			isBezierCurve = !isBezierCurve;
 		}
 	}
 
@@ -219,8 +224,8 @@ private:
 	CPU_Geometry& square_;
 	GPU_Geometry& pointsGPUGeom_;
 	GPU_Geometry& linesGPUGeom_;
-	CPU_Geometry& bezierCurve_;
-	GPU_Geometry& bezierGPUGeom_;
+	CPU_Geometry& generatedCurve_;
+	GPU_Geometry& generatedGPUGeom_;
 	float xPos_;
 	float yPos_;
 	int selectedIndex_;
@@ -260,7 +265,7 @@ void deCasteljauBezierGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& be
 		std::vector<glm::vec3> intermediatePoints = controlPointsGeom.verts;
 
 
-		for (float u = 0; u < 1.0f; u += 1.0f / (float)numBezierPoints)
+		for (float u = 0; u < 1.0f; u += 1.0f / (float)numPointsOnGeneratedCurve)
 		{
 			for (int i = 0; i < degree; i++)
 			{
@@ -278,6 +283,25 @@ void deCasteljauBezierGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& be
 	}
 }
 
+void bsplineGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bsplineCurve, GPU_Geometry& bsplineGPUGeom)
+{
+	if (controlPointsGeom.verts.size() >= 2)
+	{
+		bsplineCurve.verts.clear();
+		bsplineCurve.cols.clear();
+		std::vector<glm::vec3> intermediatePoints = controlPointsGeom.verts;
+
+
+		for (int i = 0; i < intermediatePoints.size(); i++)
+		{
+			bsplineCurve.verts.push_back(intermediatePoints[i]);
+			bsplineCurve.cols.push_back(glm::vec3{ 0.3f, 0.7f, 0.9f });
+		}
+
+		updateGPUGeometry(bsplineGPUGeom, bsplineCurve);
+	}
+}
+
 int main() {
 	Log::debug("Starting main");
 
@@ -289,21 +313,19 @@ int main() {
 	GLDebug::enable();
 
 	CPU_Geometry square;
-	CPU_Geometry bezierCurve;
+	CPU_Geometry generatedCurve;
 	GPU_Geometry pointsGPUGeom;
 	GPU_Geometry linesGPUGeom;
-	GPU_Geometry bezierGPUGeom;
+	GPU_Geometry generatedGPUGeom;
 	glm::vec3* selectedPoint = new glm::vec3(0.0f, 0.0f, 0.0f);
 
 
-	bezierCurve.verts.resize(numBezierPoints, glm::vec3{ 0.0f, 0.0f, 0.0f });
-	bezierCurve.cols.resize(numBezierPoints, glm::vec3{ 0.3f, 0.7f, 0.9f });
-	updateGPUGeometry(bezierGPUGeom, bezierCurve);
-
-	bool isBezierCurve = true;
+	generatedCurve.verts.resize(numPointsOnGeneratedCurve, glm::vec3{ 0.0f, 0.0f, 0.0f });
+	generatedCurve.cols.resize(numPointsOnGeneratedCurve, glm::vec3{ 0.3f, 0.7f, 0.9f });
+	updateGPUGeometry(generatedGPUGeom, generatedCurve);
 
 	// CALLBACKS
-	auto a3 = std::make_shared<Assignment3>(square, bezierCurve, bezierGPUGeom, pointsGPUGeom, linesGPUGeom, converter, selectedPoint);
+	auto a3 = std::make_shared<Assignment3>(square, generatedCurve, generatedGPUGeom, pointsGPUGeom, linesGPUGeom, converter, selectedPoint);
 	window.setCallbacks(a3);
 
 
@@ -320,15 +342,23 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		dragSelectedPoint(*a3, square, pointsGPUGeom, linesGPUGeom);
-		deCasteljauBezierGenerator(square, bezierCurve, bezierGPUGeom);
+
+		if (isBezierCurve)
+		{
+			deCasteljauBezierGenerator(square, generatedCurve, generatedGPUGeom);
+		}
+		else
+		{
+			bsplineGenerator(square, generatedCurve, generatedGPUGeom);
+		}
 
 		shader.use();
 
 		linesGPUGeom.bind();
 		glDrawArrays(GL_LINE_STRIP, 0, GLsizei(square.verts.size()));
 
-		bezierGPUGeom.bind();
-		glDrawArrays(GL_LINE_STRIP, 0, GLsizei(bezierCurve.verts.size()));
+		generatedGPUGeom.bind();
+		glDrawArrays(GL_LINE_STRIP, 0, GLsizei(generatedCurve.verts.size()));
 
 		pointsGPUGeom.bind();
 		glDrawArrays(GL_POINTS, 0, GLsizei(square.verts.size()));
@@ -363,6 +393,7 @@ int main() {
 		ImGui::Text("Left click and drag to move control points.");
 		ImGui::Text("Press \"d\" to delete the selected (blue) control point.");
 		ImGui::Text("Press \"r\" to reset the window and clear all control points.");
+		ImGui::Text("Press \"UP KEY\" to toggle between bezier and b-spline curves.");
 
 		if (isBezierCurve)
 		{
