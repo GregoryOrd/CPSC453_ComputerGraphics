@@ -287,14 +287,34 @@ void bsplineGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bsplineCurve
 {
 	if (controlPointsGeom.verts.size() >= 2)
 	{
-		bsplineCurve.verts.clear();
-		bsplineCurve.cols.clear();
-		std::vector<glm::vec3> intermediatePoints = controlPointsGeom.verts;
+		std::vector<glm::vec3> controlPoints = controlPointsGeom.verts;
 
+		int numIterations = log2(numPointsOnGeneratedCurve / controlPoints.size());
 
-		for (int i = 0; i < intermediatePoints.size(); i++)
+		for(int iteration = 0; iteration < numIterations; iteration++)
 		{
-			bsplineCurve.verts.push_back(intermediatePoints[i]);
+			bsplineCurve.verts.clear();
+
+			for (int i = 0; i < controlPoints.size() - 1; i++)
+			{
+				bsplineCurve.verts.push_back((3.0f / 4.0f) * controlPoints[i] + (1.0f / 4.0f) * controlPoints[i + 1]);
+				bsplineCurve.verts.push_back((1.0f / 4.0f) * controlPoints[i] + (3.0f / 4.0f) * controlPoints[i + 1]);
+			}
+
+			//Modify beginning and end of curve to make it an open curve
+			bsplineCurve.verts[0] = controlPoints[0];
+			bsplineCurve.verts[1] = (1.0f/2.0f)*controlPoints[0] + (1.0f/2.0f)*controlPoints[1];
+
+			bsplineCurve.verts[bsplineCurve.verts.size() - 2] = (1.0f/2.0f)*controlPoints[controlPoints.size() - 1] + (1.0f / 2.0f) * controlPoints[controlPoints.size() - 2];
+			bsplineCurve.verts[bsplineCurve.verts.size() - 1] = controlPoints[controlPoints.size() - 1];
+
+			controlPoints = bsplineCurve.verts;
+		}
+
+		//Colour b-spline curve
+		bsplineCurve.cols.clear();
+		for (int i = 0; i < bsplineCurve.verts.size(); i++)
+		{
 			bsplineCurve.cols.push_back(glm::vec3{ 0.3f, 0.7f, 0.9f });
 		}
 
