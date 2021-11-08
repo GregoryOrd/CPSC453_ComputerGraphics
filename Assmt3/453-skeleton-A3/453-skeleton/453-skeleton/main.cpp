@@ -28,6 +28,8 @@ const glm::vec3 nonSelectedColour = { 1.f, 0.0f, 0.0f };
 const float collisionThreshold = 0.01f;
 const int numPointsOnGeneratedCurve = 1000;
 bool isBezierCurve = true;
+bool showControlPolygon = true;
+bool showControlPoints = true;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry &gpuGeom, CPU_Geometry const &cpuGeom) {
@@ -162,6 +164,14 @@ public:
 		else if (key == GLFW_KEY_UP && action == GLFW_PRESS)
 		{
 			isBezierCurve = !isBezierCurve;
+		}
+		else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+		{
+			showControlPolygon = !showControlPolygon;
+		}
+		else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+		{
+			showControlPoints = !showControlPoints;
 		}
 	}
 
@@ -374,14 +384,21 @@ int main() {
 
 		shader.use();
 
-		linesGPUGeom.bind();
-		glDrawArrays(GL_LINE_STRIP, 0, GLsizei(square.verts.size()));
+		if (showControlPolygon)
+		{
+			linesGPUGeom.bind();
+			glDrawArrays(GL_LINE_STRIP, 0, GLsizei(square.verts.size()));
+		}
 
 		generatedGPUGeom.bind();
 		glDrawArrays(GL_LINE_STRIP, 0, GLsizei(generatedCurve.verts.size()));
 
-		pointsGPUGeom.bind();
-		glDrawArrays(GL_POINTS, 0, GLsizei(square.verts.size()));
+
+		if (showControlPoints)
+		{
+			pointsGPUGeom.bind();
+			glDrawArrays(GL_POINTS, 0, GLsizei(square.verts.size()));
+		}
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
@@ -414,6 +431,8 @@ int main() {
 		ImGui::Text("Press \"d\" to delete the selected (blue) control point.");
 		ImGui::Text("Press \"r\" to reset the window and clear all control points.");
 		ImGui::Text("Press \"UP KEY\" to toggle between bezier and b-spline curves.");
+		ImGui::Text("Press \"DOWN KEY\" to toggle showing the control polygon.");
+		ImGui::Text("Press \"RIGHT KEY\" to toggle showing the control points.");
 
 		if (isBezierCurve)
 		{
