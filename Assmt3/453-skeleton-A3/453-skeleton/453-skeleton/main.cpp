@@ -30,6 +30,7 @@ const int numPointsOnGeneratedCurve = 1000;
 bool isBezierCurve = true;
 bool showControlPolygon = true;
 bool showControlPoints = true;
+bool using2DEditView = true;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry &gpuGeom, CPU_Geometry const &cpuGeom) {
@@ -133,66 +134,84 @@ public:
 	}
 
 	virtual void keyCallback(int key, int scancode, int action, int mods) {
-		if (key == GLFW_KEY_D && action == GLFW_PRESS)
+		if (using2DEditView)
 		{
-			if (selectedIndex() != -1)
+			if (key == GLFW_KEY_D && action == GLFW_PRESS)
 			{
-				square_.cols.erase(square_.cols.begin() + selectedIndex());
-				square_.verts.erase(square_.verts.begin() + selectedIndex());
+				if (selectedIndex() != -1)
+				{
+					square_.cols.erase(square_.cols.begin() + selectedIndex());
+					square_.verts.erase(square_.verts.begin() + selectedIndex());
+				}
+
+				selectedIndex_ = -1;
+
+				updatePoints();
+				updateLines();
 			}
+			else if (key == GLFW_KEY_R && action == GLFW_PRESS)
+			{
 
-			selectedIndex_ = -1;
+				square_.cols.clear();
+				square_.verts.clear();
 
-			updatePoints();
-			updateLines();
+				generatedCurve_.cols.clear();
+				generatedCurve_.verts.clear();
+
+				selectedIndex_ = -1;
+
+				updatePoints();
+				updateLines();
+				updateGeneratedCurve();
+			}
+			else if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+			{
+				isBezierCurve = !isBezierCurve;
+			}
+			else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
+			{
+				showControlPolygon = !showControlPolygon;
+			}
+			else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
+			{
+				showControlPoints = !showControlPoints;
+			}
 		}
-		else if (key == GLFW_KEY_R && action == GLFW_PRESS)
+		else
 		{
-
-			square_.cols.clear();
-			square_.verts.clear();
-
-			generatedCurve_.cols.clear();
-			generatedCurve_.verts.clear();
-
-			selectedIndex_ = -1;
-
-			updatePoints();
-			updateLines();
-			updateGeneratedCurve();
+			//3D Viewer Controls Here
 		}
-		else if (key == GLFW_KEY_UP && action == GLFW_PRESS)
+		if (key == GLFW_KEY_G && action == GLFW_PRESS)
 		{
-			isBezierCurve = !isBezierCurve;
-		}
-		else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
-		{
-			showControlPolygon = !showControlPolygon;
-		}
-		else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
-		{
-			showControlPoints = !showControlPoints;
+			using2DEditView = !using2DEditView;
 		}
 	}
 
 	virtual void mouseButtonCallback(int button, int action, int mods) {
-		if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS && !mouseDragging_)
+		if (using2DEditView)
 		{
-			selectedIndex_ = -1;
-			mouseDragging_ = true;
-			colourPointsAndSetSelectedIndex();
-
-			if (selectedIndex_ == -1)
+			if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS && !mouseDragging_)
 			{
-				addPoint();
-			}
+				selectedIndex_ = -1;
+				mouseDragging_ = true;
+				colourPointsAndSetSelectedIndex();
 
-			updatePoints();
-			updateLines();
+				if (selectedIndex_ == -1)
+				{
+					addPoint();
+				}
+
+				updatePoints();
+				updateLines();
+			}
+			else if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
+			{
+				mouseDragging_ = false;
+			}
 		}
-		else if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
+		else
 		{
-			mouseDragging_ = false;
+			//3D Mouse Controls Here
 		}
 	}
 
@@ -371,7 +390,10 @@ int main() {
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		dragSelectedPoint(*a3, square, pointsGPUGeom, linesGPUGeom);
+		if (using2DEditView)
+		{
+			dragSelectedPoint(*a3, square, pointsGPUGeom, linesGPUGeom);
+		}
 
 		if (isBezierCurve)
 		{
@@ -426,13 +448,22 @@ int main() {
 		// Scale up text a little, and set its value
 		ImGui::SetWindowFontScale(1.5f);
 		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		ImGui::Text("Left click to add/select control points.");
-		ImGui::Text("Left click and drag to move control points.");
-		ImGui::Text("Press \"d\" to delete the selected (blue) control point.");
-		ImGui::Text("Press \"r\" to reset the window and clear all control points.");
-		ImGui::Text("Press \"UP KEY\" to toggle between bezier and b-spline curves.");
-		ImGui::Text("Press \"DOWN KEY\" to toggle showing the control polygon.");
-		ImGui::Text("Press \"RIGHT KEY\" to toggle showing the control points.");
+		if (using2DEditView)
+		{
+			ImGui::Text("Left click to add/select control points.");
+			ImGui::Text("Left click and drag to move control points.");
+			ImGui::Text("Press \"d\" to delete the selected (blue) control point.");
+			ImGui::Text("Press \"r\" to reset the window and clear all control points.");
+			ImGui::Text("Press \"UP KEY\" to toggle between bezier and b-spline curves.");
+			ImGui::Text("Press \"DOWN KEY\" to toggle showing the control polygon.");
+			ImGui::Text("Press \"RIGHT KEY\" to toggle showing the control points.");
+			ImGui::Text("Press \"g\" to switch to the 3D view.");
+		}
+		else
+		{
+			ImGui::Text("Press \"g\" to switch to the 2D editing view.");
+		}
+
 
 		if (isBezierCurve)
 		{
