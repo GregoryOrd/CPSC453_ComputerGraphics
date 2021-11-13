@@ -24,12 +24,9 @@ public:
 	// Public interface
 	bool recompile();
 	void use() const { glUseProgram(programID); }
+	GLint programId() const;
 
 	void friend attach(ShaderProgram& sp, Shader& s);
-
-	operator GLuint() const {
-		return programID;
-	}
 
 private:
 	ShaderProgramHandle programID;

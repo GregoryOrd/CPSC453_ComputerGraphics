@@ -1,4 +1,5 @@
 #include <GL/glew.h>
+#include <GL/glu.h>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
@@ -354,6 +355,15 @@ void bsplineGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bsplineCurve
 int main() {
 	Log::debug("Starting main");
 
+	float fovy = 60.0f;
+	float aspect = 1.0f;
+	float zNear = -0.5f;
+	float zFar = 0.5f;
+
+	glm::vec3 eye = { 0.0f, 1.0f, 0.0f };
+	glm::vec3 center = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 upVector = { 0.0f, 0.0f, -1.0f };
+
 	// WINDOW
 	glfwInit();
 	Window window(800, 800, "CPSC 453"); // can set callbacks at construction if desired
@@ -366,11 +376,40 @@ int main() {
 	GPU_Geometry pointsGPUGeom;
 	GPU_Geometry linesGPUGeom;
 	GPU_Geometry generatedGPUGeom;
+
+	CPU_Geometry floorGrid;
+	GPU_Geometry floorGridGPUGeom;
+
+	for (float i = -0.5f; i < 0.0f; i += 0.1f)
+	{
+		for (float j = -0.8f; j < 0.5f; j += 0.1f)
+		{
+			float firstRow = j;
+			float secondRow = j + 0.5f;
+			float firstColumn = i;
+			float secondColumn = i + 0.5f;
+
+			floorGrid.verts.push_back({ firstRow, 0.0f, firstColumn });
+			floorGrid.verts.push_back({ secondRow, 0.0f, firstColumn });
+			floorGrid.verts.push_back({ secondRow, 0.0f, secondColumn });
+			floorGrid.verts.push_back({ firstRow, 0.0f, secondColumn });
+
+			for (int vertNum = 0; vertNum < 4; vertNum++)
+			{
+				floorGrid.cols.push_back({ 0.0f, 0.0f, 0.0f });
+			}
+		}
+	}
+	updateGPUGeometry(floorGridGPUGeom, floorGrid);
+
 	glm::vec3* selectedPoint = new glm::vec3(0.0f, 0.0f, 0.0f);
 
+	glm::mat4 projectionMatrix = glm::perspective(fovy, aspect, zNear, zFar);
+	glm::mat4 view;
 
 	generatedCurve.verts.resize(numPointsOnGeneratedCurve, glm::vec3{ 0.0f, 0.0f, 0.0f });
 	generatedCurve.cols.resize(numPointsOnGeneratedCurve, glm::vec3{ 0.3f, 0.7f, 0.9f });
+
 	updateGPUGeometry(generatedGPUGeom, generatedCurve);
 
 	// CALLBACKS
@@ -387,6 +426,7 @@ int main() {
 
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_FRAMEBUFFER_SRGB);
+		glEnable(GL_DEPTH_TEST);
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -406,15 +446,41 @@ int main() {
 
 		shader.use();
 
+
+		if (using2DEditView)
+		{
+			view = { {1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f} };
+			projectionMatrix = { {1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f} };
+		}
+		else
+		{
+			view = glm::lookAt(eye, center, upVector);
+		}
+
+		
+		GLint viewMatrixShaderVariable = glGetUniformLocation(shader.programId(), "viewMatrix");
+		glUniformMatrix4fv(viewMatrixShaderVariable, 1, GL_FALSE, &view[0][0]);
+
+		GLint projectionMatrixShaderVariable = glGetUniformLocation(shader.programId(), "projectionMatrix");
+		glUniformMatrix4fv(projectionMatrixShaderVariable, 1, GL_FALSE, &projectionMatrix[0][0]);
+
 		if (showControlPolygon)
 		{
 			linesGPUGeom.bind();
 			glDrawArrays(GL_LINE_STRIP, 0, GLsizei(square.verts.size()));
 		}
 
+		if (!using2DEditView)
+		{
+			floorGridGPUGeom.bind();
+			for (int i = 0; i < floorGrid.verts.size(); i += 4)
+			{
+				glDrawArrays(GL_LINE_LOOP, i, 4);
+			}
+		}
+
 		generatedGPUGeom.bind();
 		glDrawArrays(GL_LINE_STRIP, 0, GLsizei(generatedCurve.verts.size()));
-
 
 		if (showControlPoints)
 		{

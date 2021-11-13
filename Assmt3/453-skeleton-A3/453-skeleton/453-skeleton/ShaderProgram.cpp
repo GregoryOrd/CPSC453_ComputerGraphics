@@ -61,3 +61,8 @@ bool ShaderProgram::checkAndLogLinkSuccess() const {
 		return true;
 	}
 }
+
+GLint ShaderProgram::programId() const
+{
+	return programID.value();
+}
