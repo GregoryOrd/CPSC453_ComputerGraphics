@@ -26,6 +26,7 @@
 
 const glm::vec3 selectedColour = { 0.f, 0.f, 1.0f };
 const glm::vec3 nonSelectedColour = { 1.f, 0.0f, 0.0f };
+const glm::vec3 generatedCurveColour = { 0.f, 0.0f, 1.0f };
 const float collisionThreshold = 0.01f;
 const int numPointsOnGeneratedCurve = 1000;
 bool isBezierCurve = true;
@@ -33,6 +34,7 @@ bool showControlPolygon = true;
 bool showControlPoints = true;
 bool using2DEditView = true;
 const float cameraTranslationIncrement = 0.01f;
+const float floorGridStep = 0.05f;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry &gpuGeom, CPU_Geometry const &cpuGeom) {
@@ -51,22 +53,33 @@ public:
 	{
 	}
 
-
-	glm::vec3 moveForward()
+	void moveForward()
 	{
 		eye_ = eye_ + cameraTranslationIncrement * direction();
 	}
-	glm::vec3 moveBackward()
+	void moveBackward()
 	{
 		eye_ = eye_ - cameraTranslationIncrement * direction();
 	}
-	glm::vec3 moveLeft()
+	void moveUp()
+	{
+		eye_ = eye_ - cameraTranslationIncrement * upVector_;
+		center_ = center_ - cameraTranslationIncrement * upVector_;
+	}
+	void moveDown()
+	{
+		eye_ = eye_ + cameraTranslationIncrement * upVector_;
+		center_ = center_ + cameraTranslationIncrement * upVector_;
+	}
+	void moveLeft()
 	{
 		eye_ = eye_ - cameraTranslationIncrement * rightDirection();
+		center_ = center_ - cameraTranslationIncrement * rightDirection();
 	}
-	glm::vec3 moveRight()
+	void moveRight()
 	{
 		eye_ = eye_ + cameraTranslationIncrement * rightDirection();
+		center_ = center_ + cameraTranslationIncrement * rightDirection();
 	}
 	glm::mat4 perspectiveMatrix()
 	{
@@ -94,7 +107,7 @@ public:
 private:
 	glm::vec3 rightDirection()
 	{
-		return glm::cross(direction(), upVector_);
+		return glm::cross(upVector_, direction());
 	}
 
 	glm::vec3 direction()
@@ -147,8 +160,8 @@ private:
 class Assignment3 : public CallbackInterface {
 
 public:
-	Assignment3(CPU_Geometry& square, CPU_Geometry& generatedCurve, GPU_Geometry& generatedGPUGeom, GPU_Geometry& pointsGPUGeom, GPU_Geometry& linesGPUGeom, CursorPositionConverter& converter, glm::vec3* selectedPoint)
-		: square_(square), generatedCurve_(generatedCurve), generatedGPUGeom_(generatedGPUGeom), pointsGPUGeom_(pointsGPUGeom), linesGPUGeom_(linesGPUGeom), converter_(converter), xPos_(0.f), yPos_(0.f), mouseDragging_(false), selectedIndex_(-1)
+	Assignment3(CPU_Geometry& square, CPU_Geometry& generatedCurve, GPU_Geometry& generatedGPUGeom, GPU_Geometry& pointsGPUGeom, GPU_Geometry& linesGPUGeom, CursorPositionConverter& converter, glm::vec3* selectedPoint, Camera& camera)
+		: square_(square), generatedCurve_(generatedCurve), generatedGPUGeom_(generatedGPUGeom), pointsGPUGeom_(pointsGPUGeom), linesGPUGeom_(linesGPUGeom), converter_(converter), xPos_(0.f), yPos_(0.f), mouseDragging_(false), selectedIndex_(-1), camera_(camera)
 	{
 	}
 
@@ -253,6 +266,30 @@ public:
 		else
 		{
 			//3D Viewer Controls Here
+			if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT))
+			{
+				camera_.moveForward();
+			}
+			else if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT))
+			{
+				camera_.moveBackward();
+			}
+			else if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))
+			{
+				camera_.moveLeft();
+			}
+			else if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT))
+			{
+				camera_.moveRight();
+			}
+			else if (key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
+			{
+				camera_.moveUp();
+			}
+			else if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
+			{
+				camera_.moveDown();
+			}
 		}
 		if (key == GLFW_KEY_G && action == GLFW_PRESS)
 		{
@@ -328,6 +365,7 @@ private:
 	GPU_Geometry& linesGPUGeom_;
 	CPU_Geometry& generatedCurve_;
 	GPU_Geometry& generatedGPUGeom_;
+	Camera& camera_;
 	float xPos_;
 	float yPos_;
 	int selectedIndex_;
@@ -376,7 +414,7 @@ void deCasteljauBezierGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& be
 			}
 
 			bezierCurve.verts.push_back(intermediatePoints[0]);
-			bezierCurve.cols.push_back(glm::vec3{ 0.3f, 0.7f, 0.9f });
+			bezierCurve.cols.push_back(generatedCurveColour);
 		}
 
 		updateGPUGeometry(bezierGPUGeom, bezierCurve);
@@ -414,7 +452,7 @@ void bsplineGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bsplineCurve
 		bsplineCurve.cols.clear();
 		for (int i = 0; i < bsplineCurve.verts.size(); i++)
 		{
-			bsplineCurve.cols.push_back(glm::vec3{ 0.3f, 0.7f, 0.9f });
+			bsplineCurve.cols.push_back(generatedCurveColour);
 		}
 
 		updateGPUGeometry(bsplineGPUGeom, bsplineCurve);
@@ -422,14 +460,14 @@ void bsplineGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bsplineCurve
 }
 void generateFloorGrid(CPU_Geometry& floorGrid, GPU_Geometry& floorGridGPUGeom)
 {
-	for (float i = -0.5f; i < 0.0f; i += 0.1f)
+	for (float i = -0.2f; i < 0.2f; i += floorGridStep)
 	{
-		for (float j = -0.8f; j < 0.5f; j += 0.1f)
+		for (float j = -1.0f; j < 1.0f; j += floorGridStep)
 		{
 			float firstRow = j;
-			float secondRow = j + 0.5f;
+			float secondRow = j + floorGridStep;
 			float firstColumn = i;
-			float secondColumn = i + 0.5f;
+			float secondColumn = i + floorGridStep;
 
 			floorGrid.verts.push_back({ firstRow, 0.0f, firstColumn });
 			floorGrid.verts.push_back({ secondRow, 0.0f, firstColumn });
@@ -480,7 +518,7 @@ int main() {
 	updateGPUGeometry(generatedGPUGeom, generatedCurve);
 
 	// CALLBACKS
-	auto a3 = std::make_shared<Assignment3>(square, generatedCurve, generatedGPUGeom, pointsGPUGeom, linesGPUGeom, converter, selectedPoint);
+	auto a3 = std::make_shared<Assignment3>(square, generatedCurve, generatedGPUGeom, pointsGPUGeom, linesGPUGeom, converter, selectedPoint, camera);
 	window.setCallbacks(a3);
 
 
