@@ -46,7 +46,7 @@ class Camera
 {
 public:
 	Camera(Window& window, glm::vec3 eye, glm::vec3 center, glm::vec3 upVector):
-		fovy_(60.f), aspect_(window.getWidth()/window.getHeight()), zNear_(0.2f), zFar_(-0.2f),
+		fovy_(55.0f), aspect_(window.getWidth()/window.getHeight()), zNear_(0.5f), zFar_(-0.5f),
 		eye_(eye), center_(center), upVector_(upVector)
 	{
 	}
@@ -56,22 +56,18 @@ public:
 	{
 		eye_ = eye_ + cameraTranslationIncrement * direction();
 	}
-
 	glm::vec3 moveBackward()
 	{
 		eye_ = eye_ - cameraTranslationIncrement * direction();
 	}
-
 	glm::vec3 moveLeft()
 	{
 		eye_ = eye_ - cameraTranslationIncrement * rightDirection();
 	}
-
 	glm::vec3 moveRight()
 	{
 		eye_ = eye_ + cameraTranslationIncrement * rightDirection();
 	}
-
 	glm::mat4 perspectiveMatrix()
 	{
 		if (using2DEditView)
@@ -83,7 +79,6 @@ public:
 			return glm::perspective(fovy_, aspect_, zNear_, zFar_);
 		}
 	}
-
 	glm::mat4 viewMatrix()
 	{
 		if (using2DEditView)
@@ -338,7 +333,6 @@ private:
 	int selectedIndex_;
 	bool mouseDragging_;
 };
-
 void dragSelectedPoint(Assignment3& a3, CPU_Geometry& square, GPU_Geometry& pointsGPUGeom, GPU_Geometry& linesGPUGeom)
 {
 	if (a3.mouseDragging())
@@ -360,7 +354,6 @@ void dragSelectedPoint(Assignment3& a3, CPU_Geometry& square, GPU_Geometry& poin
 		a3.updateLines();
 	}
 }
-
 void deCasteljauBezierGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bezierCurve, GPU_Geometry& bezierGPUGeom)
 {
 	if (controlPointsGeom.verts.size() >= 2)
@@ -389,7 +382,6 @@ void deCasteljauBezierGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& be
 		updateGPUGeometry(bezierGPUGeom, bezierCurve);
 	}
 }
-
 void bsplineGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bsplineCurve, GPU_Geometry& bsplineGPUGeom)
 {
 	if (controlPointsGeom.verts.size() >= 2)
@@ -428,7 +420,6 @@ void bsplineGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bsplineCurve
 		updateGPUGeometry(bsplineGPUGeom, bsplineCurve);
 	}
 }
-
 void generateFloorGrid(CPU_Geometry& floorGrid, GPU_Geometry& floorGridGPUGeom)
 {
 	for (float i = -0.5f; i < 0.0f; i += 0.1f)
@@ -457,9 +448,9 @@ void generateFloorGrid(CPU_Geometry& floorGrid, GPU_Geometry& floorGridGPUGeom)
 int main() {
 	Log::debug("Starting main");
 
-	glm::vec3 eye = { 0.0f, 1.0f, 0.0f };
+	glm::vec3 eye = { 0.0f, 0.0f, 1.0f };
 	glm::vec3 center = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 upVector = { 0.0f, 0.0f, 1.0f };
+	glm::vec3 upVector = { 0.0f, -1.0f, 0.0f };
 
 	// WINDOW
 	glfwInit();
