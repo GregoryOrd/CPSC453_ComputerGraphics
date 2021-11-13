@@ -32,6 +32,7 @@ bool isBezierCurve = true;
 bool showControlPolygon = true;
 bool showControlPoints = true;
 bool using2DEditView = true;
+const float cameraTranslationIncrement = 0.01f;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry &gpuGeom, CPU_Geometry const &cpuGeom) {
@@ -39,6 +40,82 @@ void updateGPUGeometry(GPU_Geometry &gpuGeom, CPU_Geometry const &cpuGeom) {
 	gpuGeom.setVerts(cpuGeom.verts);
 	gpuGeom.setCols(cpuGeom.cols);
 }
+
+
+class Camera
+{
+public:
+	Camera(Window& window, glm::vec3 eye, glm::vec3 center, glm::vec3 upVector):
+		fovy_(60.f), aspect_(window.getWidth()/window.getHeight()), zNear_(0.2f), zFar_(-0.2f),
+		eye_(eye), center_(center), upVector_(upVector)
+	{
+	}
+
+
+	glm::vec3 moveForward()
+	{
+		eye_ = eye_ + cameraTranslationIncrement * direction();
+	}
+
+	glm::vec3 moveBackward()
+	{
+		eye_ = eye_ - cameraTranslationIncrement * direction();
+	}
+
+	glm::vec3 moveLeft()
+	{
+		eye_ = eye_ - cameraTranslationIncrement * rightDirection();
+	}
+
+	glm::vec3 moveRight()
+	{
+		eye_ = eye_ + cameraTranslationIncrement * rightDirection();
+	}
+
+	glm::mat4 perspectiveMatrix()
+	{
+		if (using2DEditView)
+		{
+			return glm::mat4(1.0f);
+		}
+		else
+		{
+			return glm::perspective(fovy_, aspect_, zNear_, zFar_);
+		}
+	}
+
+	glm::mat4 viewMatrix()
+	{
+		if (using2DEditView)
+		{
+			return glm::mat4(1.0f);
+		}
+		else
+		{
+			return glm::lookAt(eye_, center_, upVector_);
+		}
+	}
+
+private:
+	glm::vec3 rightDirection()
+	{
+		return glm::cross(direction(), upVector_);
+	}
+
+	glm::vec3 direction()
+	{
+		return center_ - eye_;
+	}
+
+private:
+	float fovy_;
+	float aspect_;
+	float zNear_;
+	float zFar_;
+	glm::vec3 eye_;
+	glm::vec3 center_;
+	glm::vec3 upVector_;
+};
 
 class CursorPositionConverter
 {
@@ -352,34 +429,8 @@ void bsplineGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bsplineCurve
 	}
 }
 
-int main() {
-	Log::debug("Starting main");
-
-	float fovy = 60.0f;
-	float aspect = 1.0f;
-	float zNear = -0.5f;
-	float zFar = 0.5f;
-
-	glm::vec3 eye = { 0.0f, 1.0f, 0.0f };
-	glm::vec3 center = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 upVector = { 0.0f, 0.0f, -1.0f };
-
-	// WINDOW
-	glfwInit();
-	Window window(800, 800, "CPSC 453"); // can set callbacks at construction if desired
-	CursorPositionConverter converter(window);
-
-	GLDebug::enable();
-
-	CPU_Geometry square;
-	CPU_Geometry generatedCurve;
-	GPU_Geometry pointsGPUGeom;
-	GPU_Geometry linesGPUGeom;
-	GPU_Geometry generatedGPUGeom;
-
-	CPU_Geometry floorGrid;
-	GPU_Geometry floorGridGPUGeom;
-
+void generateFloorGrid(CPU_Geometry& floorGrid, GPU_Geometry& floorGridGPUGeom)
+{
 	for (float i = -0.5f; i < 0.0f; i += 0.1f)
 	{
 		for (float j = -0.8f; j < 0.5f; j += 0.1f)
@@ -401,15 +452,40 @@ int main() {
 		}
 	}
 	updateGPUGeometry(floorGridGPUGeom, floorGrid);
+}
 
+int main() {
+	Log::debug("Starting main");
+
+	glm::vec3 eye = { 0.0f, 1.0f, 0.0f };
+	glm::vec3 center = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 upVector = { 0.0f, 0.0f, 1.0f };
+
+	// WINDOW
+	glfwInit();
+	Window window(800, 800, "CPSC 453"); // can set callbacks at construction if desired
+	CursorPositionConverter converter(window);
+	Camera camera(window, eye, center, upVector);
+
+	GLDebug::enable();
+
+	CPU_Geometry square;
+	CPU_Geometry generatedCurve;
+	GPU_Geometry pointsGPUGeom;
+	GPU_Geometry linesGPUGeom;
+	GPU_Geometry generatedGPUGeom;
+	CPU_Geometry floorGrid;
+	GPU_Geometry floorGridGPUGeom;
+
+	glm::mat4 projectionMatrix = camera.perspectiveMatrix();
+	glm::mat4 view = camera.viewMatrix();
 	glm::vec3* selectedPoint = new glm::vec3(0.0f, 0.0f, 0.0f);
 
-	glm::mat4 projectionMatrix = glm::perspective(fovy, aspect, zNear, zFar);
-	glm::mat4 view;
+	generateFloorGrid(floorGrid, floorGridGPUGeom);
 
+	//Initialize Empty Generated Curve
 	generatedCurve.verts.resize(numPointsOnGeneratedCurve, glm::vec3{ 0.0f, 0.0f, 0.0f });
 	generatedCurve.cols.resize(numPointsOnGeneratedCurve, glm::vec3{ 0.3f, 0.7f, 0.9f });
-
 	updateGPUGeometry(generatedGPUGeom, generatedCurve);
 
 	// CALLBACKS
@@ -445,18 +521,8 @@ int main() {
 		}
 
 		shader.use();
-
-
-		if (using2DEditView)
-		{
-			view = { {1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f} };
-			projectionMatrix = { {1.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f} };
-		}
-		else
-		{
-			view = glm::lookAt(eye, center, upVector);
-		}
-
+		projectionMatrix = camera.perspectiveMatrix();
+		view = camera.viewMatrix();
 		
 		GLint viewMatrixShaderVariable = glGetUniformLocation(shader.programId(), "viewMatrix");
 		glUniformMatrix4fv(viewMatrixShaderVariable, 1, GL_FALSE, &view[0][0]);
