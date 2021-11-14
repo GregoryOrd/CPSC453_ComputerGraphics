@@ -35,7 +35,7 @@ bool isBezierCurve = true;
 bool showControlPolygon = true;
 bool showControlPoints = true;
 bool showFloorGrid = true;
-bool using2DEditView = true;
+int sceneNumber = 0;
 const float cameraTranslationIncrement = 0.01f;
 const float floorGridStep = 0.05f;
 
@@ -86,7 +86,7 @@ public:
 	}
 	glm::mat4 perspectiveMatrix()
 	{
-		if (using2DEditView)
+		if (sceneNumber == 0)
 		{
 			return glm::mat4(1.0f);
 		}
@@ -97,7 +97,7 @@ public:
 	}
 	glm::mat4 viewMatrix()
 	{
-		if (using2DEditView)
+		if (sceneNumber == 0)
 		{
 			return glm::mat4(1.0f);
 		}
@@ -243,7 +243,7 @@ public:
 	}
 
 	virtual void keyCallback(int key, int scancode, int action, int mods) {
-		if (using2DEditView)
+		if (sceneNumber == 0)
 		{
 			if (key == GLFW_KEY_D && action == GLFW_PRESS)
 			{
@@ -320,7 +320,18 @@ public:
 		}
 		if (key == GLFW_KEY_G && action == GLFW_PRESS)
 		{
-			using2DEditView = !using2DEditView;
+			//2D Editor View
+			sceneNumber = 0;
+		}
+		else if (key == GLFW_KEY_H && action == GLFW_PRESS)
+		{
+			//3D Curve Viewer
+			sceneNumber = 1;
+		}
+		else if (key == GLFW_KEY_J && action == GLFW_PRESS)
+		{
+			//3D Surface of Revolution Viewer
+			sceneNumber = 2;
 		}
 	}
 
@@ -330,7 +341,7 @@ public:
 			mouseDragging_ = true;
 			dragStart_ = { convertedXPos(), convertedYPos() };
 
-			if (using2DEditView)
+			if (sceneNumber == 0)
 			{
 				selectedIndex_ = -1;
 				colourPointsAndSetSelectedIndex();
@@ -622,7 +633,7 @@ int main() {
 		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		if (using2DEditView)
+		if (sceneNumber == 0)
 		{
 			dragSelectedPoint(*a3, square, pointsGPUGeom, linesGPUGeom);
 		}
@@ -650,28 +661,54 @@ int main() {
 		GLint projectionMatrixShaderVariable = glGetUniformLocation(shader.programId(), "projectionMatrix");
 		glUniformMatrix4fv(projectionMatrixShaderVariable, 1, GL_FALSE, &projectionMatrix[0][0]);
 
-		if (showControlPolygon)
+		if (sceneNumber == 0)
 		{
-			linesGPUGeom.bind();
-			glDrawArrays(GL_LINE_STRIP, 0, GLsizei(square.verts.size()));
-		}
-
-		if (!using2DEditView && showFloorGrid)
-		{
-			floorGridGPUGeom.bind();
-			for (int i = 0; i < floorGrid.verts.size(); i += 4)
+			//2D Curve Editor
+			if (showControlPolygon)
 			{
-				glDrawArrays(GL_LINE_LOOP, i, 4);
+				linesGPUGeom.bind();
+				glDrawArrays(GL_LINE_STRIP, 0, GLsizei(square.verts.size()));
 			}
+
+			if (showControlPoints)
+			{
+				pointsGPUGeom.bind();
+				glDrawArrays(GL_POINTS, 0, GLsizei(square.verts.size()));
+			}
+
+			generatedGPUGeom.bind();
+			glDrawArrays(GL_LINE_STRIP, 0, GLsizei(generatedCurve.verts.size()));
 		}
-
-		generatedGPUGeom.bind();
-		glDrawArrays(GL_LINE_STRIP, 0, GLsizei(generatedCurve.verts.size()));
-
-		if (showControlPoints)
+		else if (sceneNumber == 1)
 		{
-			pointsGPUGeom.bind();
-			glDrawArrays(GL_POINTS, 0, GLsizei(square.verts.size()));
+			//3D Curve Viewer
+			if (showControlPolygon)
+			{
+				linesGPUGeom.bind();
+				glDrawArrays(GL_LINE_STRIP, 0, GLsizei(square.verts.size()));
+			}
+
+			if (showControlPoints)
+			{
+				pointsGPUGeom.bind();
+				glDrawArrays(GL_POINTS, 0, GLsizei(square.verts.size()));
+			}
+
+			if (showFloorGrid)
+			{
+				floorGridGPUGeom.bind();
+				for (int i = 0; i < floorGrid.verts.size(); i += 4)
+				{
+					glDrawArrays(GL_LINE_LOOP, i, 4);
+				}
+			}
+
+			generatedGPUGeom.bind();
+			glDrawArrays(GL_LINE_STRIP, 0, GLsizei(generatedCurve.verts.size()));
+		}
+		else if (sceneNumber == 2)
+		{
+
 		}
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
@@ -700,7 +737,7 @@ int main() {
 		// Scale up text a little, and set its value
 		ImGui::SetWindowFontScale(1.5f);
 		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImVec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		if (using2DEditView)
+		if (sceneNumber == 0)
 		{
 			ImGui::Text("Left click to add/select control points.");
 			ImGui::Text("Left click and drag to move control points.");
@@ -709,12 +746,19 @@ int main() {
 			ImGui::Text("Press \"UP KEY\" to toggle between bezier and b-spline curves.");
 			ImGui::Text("Press \"DOWN KEY\" to toggle showing the control polygon.");
 			ImGui::Text("Press \"RIGHT KEY\" to toggle showing the control points.");
-			ImGui::Text("Press \"g\" to switch to the 3D view.");
+			ImGui::Text("Press \"h\" to switch to the 3D view.");
+			ImGui::Text("Press \"j\" to switch to the 3D surface of revolution scene view.");
 		}
-		else
+		else if(sceneNumber == 1)
 		{
-			ImGui::Text("Press \"g\" to switch to the 2D editing view.");
+			ImGui::Text("Press \"g\" to switch to the 2D curve editor.");
+			ImGui::Text("Press \"j\" to switch to the 3D surface of revolution scene view.");
 			ImGui::Text("Press \"f\" to toggle showing the zx-plane grid.");
+		}
+		else if (sceneNumber == 2)
+		{
+			ImGui::Text("Press \"g\" to switch to the 2D curve editor.");
+			ImGui::Text("Press \"h\" to switch to the 3D curve viewer.");
 		}
 
 
