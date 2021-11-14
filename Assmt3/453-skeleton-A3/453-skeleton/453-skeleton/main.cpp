@@ -30,8 +30,7 @@ const glm::vec3 selectedColour = { 0.f, 0.f, 1.0f };
 const glm::vec3 nonSelectedColour = { 1.f, 0.0f, 0.0f };
 const glm::vec3 generatedCurveColour = { 0.f, 0.0f, 1.0f };
 const float collisionThreshold = 0.01f;
-const int numPointsOnGeneratedCurve = 100;
-const int numPointsOnGeneratedSurfaceCurves = 5;
+const int numPointsOnGeneratedCurve = 50;
 bool bsplineGeneratedForSurface = false;
 bool isBezierCurve = true;
 bool showControlPolygon = true;
@@ -41,6 +40,10 @@ int sceneNumber = 0;
 const float cameraTranslationIncrement = 0.01f;
 const float floorGridStep = 0.05f;
 CPU_Geometry bsplineCurve_;
+
+const glm::vec3 initialEye = { 0.0f, 0.0f, 2.0f };
+const glm::vec3 initialCenter = { 0.0f, 0.0f, 0.0f };
+const glm::vec3 initialUpVector = { 0.0f, -1.0f, 0.0f };
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry &gpuGeom, CPU_Geometry const &cpuGeom) {
@@ -54,7 +57,7 @@ class Camera
 {
 public:
 	Camera(Window& window, glm::vec3 eye, glm::vec3 center, glm::vec3 upVector):
-		fovy_(55.0f), aspect_(window.getWidth()/window.getHeight()), zNear_(0.5f), zFar_(-0.5f),
+		fovy_(55.0f), aspect_(window.getWidth()/window.getHeight()), zNear_(1.0f), zFar_(-1.0f),
 		eye_(eye), center_(center), upVector_(upVector)
 	{
 	}
@@ -137,9 +140,9 @@ public:
 
 	void reset()
 	{
-		eye_ = { 0.0f, 0.0f, 1.0f };
-		center_ = { 0.0f, 0.0f, 0.0f };
-		upVector_ = { 0.0f, -1.0f, 0.0f };
+		eye_ = initialEye;
+		center_ = initialCenter;
+		upVector_ = initialUpVector;
 	}
 
 private:
@@ -599,9 +602,10 @@ void generateSurfaceOfRevolution(CPU_Geometry bsplineCurve, CPU_Geometry& genera
 {
 	generatedSurface.verts.clear();
 	int numPointsOnSurfaceCurves = bsplineCurve.verts.size() - 1;
+	float vIncrement = (2.0f * PI / (float)numPointsOnSurfaceCurves);
 	for (int u = 0; u < numPointsOnSurfaceCurves; u++)
 	{
-		for (float v = 0; v < 2 * PI; v += (2.0f * PI / (float)numPointsOnSurfaceCurves))
+		for (float v = 0; v < 2 * PI; v += vIncrement)
 		{
 			float surfaceXAtUV = bsplineCurve.verts[u][0] * cos(v);
 			float surfaceYAtUV = bsplineCurve.verts[u][1];
@@ -613,18 +617,32 @@ void generateSurfaceOfRevolution(CPU_Geometry bsplineCurve, CPU_Geometry& genera
 			float surfaceZAtUPlusOneAndV = bsplineCurve.verts[(u+1)][0] * sin(v);
 			glm::vec3 surfaceAtUPlusOneAndV  = { surfaceXAtUPlusOneAndV , surfaceYAtUPlusOneAndV , surfaceZAtUPlusOneAndV };
 
-			float surfaceXAtUAndVPlusOne = bsplineCurve.verts[(u + 1)][0] * cos(v + (2 * PI / numPointsOnGeneratedCurve));
+			float surfaceXAtUAndVPlusOne = bsplineCurve.verts[(u + 1)][0] * cos(v + vIncrement);
 			float surfaceYAtUAndVPlusOne = bsplineCurve.verts[(u + 1)][1];
-			float surfaceZAtUAndVPlusOne = bsplineCurve.verts[(u + 1)][0] * sin(v + (2 * PI / numPointsOnGeneratedCurve));
+			float surfaceZAtUAndVPlusOne = bsplineCurve.verts[(u + 1)][0] * sin(v + vIncrement);
 			glm::vec3 surfaceAtUAndVPlusOne = { surfaceXAtUAndVPlusOne , surfaceYAtUAndVPlusOne , surfaceZAtUAndVPlusOne };
+
+			float surfaceXAtUAndVBothPlusOne = bsplineCurve.verts[u][0] * cos(v + vIncrement);
+			float surfaceYAtUAndVBothPlusOne = bsplineCurve.verts[u][1];
+			float surfaceZAtUAndVBothPlusOne = bsplineCurve.verts[u][0] * sin(v + vIncrement);
+			glm::vec3 surfaceAtUAndVBothPlusOne = { surfaceXAtUAndVBothPlusOne , surfaceYAtUAndVBothPlusOne , surfaceZAtUAndVBothPlusOne };
 			
-			generatedSurface.verts.push_back(surfaceAtUV);
 			generatedSurface.verts.push_back(surfaceAtUPlusOneAndV);
+			generatedSurface.verts.push_back(surfaceAtUV);
+			generatedSurface.verts.push_back(surfaceAtUAndVBothPlusOne);
+
+			generatedSurface.verts.push_back(surfaceAtUV);
+			generatedSurface.verts.push_back(surfaceAtUAndVPlusOne);
+			generatedSurface.verts.push_back(surfaceAtUAndVBothPlusOne);
+
+			generatedSurface.verts.push_back(surfaceAtUPlusOneAndV);
+			generatedSurface.verts.push_back(surfaceAtUV);
 			generatedSurface.verts.push_back(surfaceAtUAndVPlusOne);
 
-			generatedSurface.cols.push_back(generatedCurveColour);
-			generatedSurface.cols.push_back(generatedCurveColour);
-			generatedSurface.cols.push_back(generatedCurveColour);
+			for (int vertexNum = 0; vertexNum < 9; vertexNum++)
+			{
+				generatedSurface.cols.push_back(generatedCurveColour);
+			}
 		}
 	}
 
@@ -634,15 +652,11 @@ void generateSurfaceOfRevolution(CPU_Geometry bsplineCurve, CPU_Geometry& genera
 int main() {
 	Log::debug("Starting main");
 
-	glm::vec3 eye = { 0.0f, 0.0f, 1.0f };
-	glm::vec3 center = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 upVector = { 0.0f, -1.0f, 0.0f };
-
 	// WINDOW
 	glfwInit();
 	Window window(800, 800, "CPSC 453"); // can set callbacks at construction if desired
 	CursorPositionConverter converter(window);
-	Camera camera(window, eye, center, upVector);
+	Camera camera(window, initialEye, initialCenter, initialUpVector);
 
 	GLDebug::enable();
 
