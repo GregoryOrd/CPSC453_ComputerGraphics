@@ -36,6 +36,7 @@ bool isBezierCurve = true;
 bool showControlPolygon = true;
 bool showControlPoints = true;
 bool showFloorGrid = true;
+bool wireFrame = true;
 int sceneNumber = 0;
 const float cameraTranslationIncrement = 0.01f;
 const float floorGridStep = 0.05f;
@@ -331,6 +332,15 @@ public:
 				showFloorGrid = !showFloorGrid;
 			}
 		}
+
+		if (sceneNumber == 2)
+		{
+			if (key == GLFW_KEY_T && action == GLFW_PRESS)
+			{
+				wireFrame = !wireFrame;
+			}
+		}
+
 		if (key == GLFW_KEY_G && action == GLFW_PRESS)
 		{
 			//2D Editor View
@@ -780,7 +790,16 @@ int main() {
 		}
 		else if (sceneNumber == 2)
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			//3D Surface of Revolution Viewer
+			if (wireFrame)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			}
+			else
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			}
+
 			if (!bsplineGeneratedForSurface)
 			{
 				bsplineGenerator(square, generatedCurve, generatedGPUGeom); //Use b-spline curve for surface of revolution
@@ -842,6 +861,7 @@ int main() {
 			ImGui::Text("Note: the camera is reset to the original starting position everytime you change scenes.");
 			ImGui::Text("Press \"g\" to switch to the 2D curve editor.");
 			ImGui::Text("Press \"h\" to switch to the 3D curve viewer.");
+			ImGui::Text("Press \"t\" to toggle between wireframe and filled.");
 		}
 
 		if (sceneNumber < 3)
