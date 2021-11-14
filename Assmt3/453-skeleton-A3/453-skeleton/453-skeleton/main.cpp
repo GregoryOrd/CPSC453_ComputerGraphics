@@ -358,6 +358,12 @@ public:
 			sceneNumber = 2;
 			camera_.reset();
 		}
+		else if (key == GLFW_KEY_K && action == GLFW_PRESS)
+		{
+			//3D Surface of Revolution Viewer
+			sceneNumber = 3;
+			camera_.reset();
+		}
 	}
 
 	virtual void mouseButtonCallback(int button, int action, int mods) {
@@ -810,6 +816,10 @@ int main() {
 			generatedSurfaceGPUGeom.bind();
 			glDrawArrays(GL_TRIANGLES, 0, GLsizei(generatedSurface.verts.size()));
 		}
+		else if (sceneNumber == 3)
+		{
+
+		}
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
@@ -848,6 +858,7 @@ int main() {
 			ImGui::Text("Press \"RIGHT KEY\" to toggle showing the control points.");
 			ImGui::Text("Press \"h\" to switch to the 3D view.");
 			ImGui::Text("Press \"j\" to switch to the 3D surface of revolution scene view.");
+			ImGui::Text("Press \"k\" to switch to the tensor product surface scene view.");
 		}
 		else if(sceneNumber == 1)
 		{
@@ -855,13 +866,22 @@ int main() {
 			ImGui::Text("Press \"g\" to switch to the 2D curve editor.");
 			ImGui::Text("Press \"j\" to switch to the 3D surface of revolution scene view.");
 			ImGui::Text("Press \"f\" to toggle showing the zx-plane grid.");
+			ImGui::Text("Press \"k\" to switch to the tensor product surface scene view.");
 		}
 		else if (sceneNumber == 2)
 		{
 			ImGui::Text("Note: the camera is reset to the original starting position everytime\nyou change scenes.");
 			ImGui::Text("Press \"g\" to switch to the 2D curve editor.");
 			ImGui::Text("Press \"h\" to switch to the 3D curve viewer.");
-			ImGui::Text("Press \"t\" to toggle between wireframe and filled.");
+			ImGui::Text("Press \"k\" to switch to the tensor product surface scene view.");
+			ImGui::Text("Press \"t\" to toggle between wireframe and solid.");
+		}
+		else if (sceneNumber == 3)
+		{
+			ImGui::Text("Note: the camera is reset to the original starting position everytime\nyou change scenes.");
+			ImGui::Text("Press \"g\" to switch to the 2D curve editor.");
+			ImGui::Text("Press \"h\" to switch to the 3D curve viewer.");
+			ImGui::Text("Press \"j\" to switch to the 3D surface of revolution viewer.");
 		}
 
 		if (sceneNumber < 2)
