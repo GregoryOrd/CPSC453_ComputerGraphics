@@ -24,6 +24,8 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#define PI 3.14159265359
+
 const glm::vec3 selectedColour = { 0.f, 0.f, 1.0f };
 const glm::vec3 nonSelectedColour = { 1.f, 0.0f, 0.0f };
 const glm::vec3 generatedCurveColour = { 0.f, 0.0f, 1.0f };
@@ -104,15 +106,35 @@ public:
 		}
 	}
 
-private:
-	glm::vec3 rightDirection()
+	float lengthOfEyeToCenter()
 	{
-		return glm::cross(upVector_, direction());
+		return direction().length();
+	}
+
+	void setCenter(glm::vec3 center)
+	{
+		center_ = center;
+	}
+
+	glm::vec3 center()
+	{
+		return center_;
+	}
+
+	glm::vec3 eye()
+	{
+		return eye_;
 	}
 
 	glm::vec3 direction()
 	{
 		return center_ - eye_;
+	}
+
+private:
+	glm::vec3 rightDirection()
+	{
+		return glm::cross(upVector_, direction());
 	}
 
 private:
@@ -298,12 +320,14 @@ public:
 	}
 
 	virtual void mouseButtonCallback(int button, int action, int mods) {
-		if (using2DEditView)
+		if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS && !mouseDragging_)
 		{
-			if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS && !mouseDragging_)
+			mouseDragging_ = true;
+			dragStart_ = { convertedXPos(), convertedYPos() };
+
+			if (using2DEditView)
 			{
 				selectedIndex_ = -1;
-				mouseDragging_ = true;
 				colourPointsAndSetSelectedIndex();
 
 				if (selectedIndex_ == -1)
@@ -314,14 +338,10 @@ public:
 				updatePoints();
 				updateLines();
 			}
-			else if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
-			{
-				mouseDragging_ = false;
-			}
 		}
-		else
+		else if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE)
 		{
-			//3D Mouse Controls Here
+			mouseDragging_ = false;
 		}
 	}
 
@@ -358,6 +378,21 @@ public:
 		return selectedIndex_;
 	}
 
+	glm::vec2 dragStart()
+	{
+		return dragStart_;
+	}
+
+	void updateDragStart()
+	{
+		dragStart_ = { convertedXPos(), convertedYPos() };
+	}
+
+	Camera& camera()
+	{
+		return camera_;
+	}
+
 private:
 	CursorPositionConverter& converter_;
 	CPU_Geometry& square_;
@@ -370,7 +405,54 @@ private:
 	float yPos_;
 	int selectedIndex_;
 	bool mouseDragging_;
+	glm::vec2 dragStart_;
 };
+void dragCamera(Assignment3& a3)
+{
+	if (a3.mouseDragging())
+	{
+		glm::vec2 dragVector = { a3.convertedXPos() - a3.dragStart()[0], a3.convertedYPos() - a3.dragStart()[1] };
+
+		if (dragVector[0] != 0.0f)
+		{
+			glm::vec4 translatedCameraCenterHomogeneous(a3.camera().center() + a3.camera().direction(), 1.0f);
+
+			float rotationAngle = dragVector[0] * PI / 2;
+			glm::mat4 rotationAboutYAxis = {
+				{cos(rotationAngle), 0.0f, sin(rotationAngle), 0.0f},
+				{0.0f, 1.0f, 0.0f, 0.0f},
+				{-sin(rotationAngle), 0.0f, cos(rotationAngle), 0.0f},
+				{0.0f, 0.0f, 0.0f, 1.0f}
+			};
+
+			glm::vec3 rotatedVector(rotationAboutYAxis * translatedCameraCenterHomogeneous);
+			glm::vec3 rotatedVectorTranslatedBackToCameraPosition = rotatedVector - a3.camera().direction();
+			a3.camera().setCenter(rotatedVectorTranslatedBackToCameraPosition);
+		}
+
+		if (dragVector[1] != 0.0f)
+		{
+			glm::vec4 translatedCameraCenterHomogeneous(a3.camera().center() + a3.camera().direction(), 1.0f);
+
+			float rotationAngle = -dragVector[1] * PI / 2;
+			if (a3.camera().direction()[2] > 0.0f)
+			{
+				rotationAngle *= -1;
+			}
+			glm::mat4 rotationAboutXAxis = {
+				{1.0f, 0.0f, 0.0f, 0.0f},
+				{0.0f, cos(rotationAngle), -sin(rotationAngle), 0.0f},
+				{0.0f, sin(rotationAngle), cos(rotationAngle), 0.0f},
+				{0.0f, 0.0f, 0.0f, 1.0f}
+			};
+
+			glm::vec3 rotatedVector(rotationAboutXAxis * translatedCameraCenterHomogeneous);
+			glm::vec3 rotatedVectorTranslatedBackToCameraPosition = rotatedVector - a3.camera().direction();
+			a3.camera().setCenter(rotatedVectorTranslatedBackToCameraPosition);
+		}
+		a3.updateDragStart();
+	}
+}
 void dragSelectedPoint(Assignment3& a3, CPU_Geometry& square, GPU_Geometry& pointsGPUGeom, GPU_Geometry& linesGPUGeom)
 {
 	if (a3.mouseDragging())
@@ -538,6 +620,10 @@ int main() {
 		if (using2DEditView)
 		{
 			dragSelectedPoint(*a3, square, pointsGPUGeom, linesGPUGeom);
+		}
+		else
+		{
+			dragCamera(*a3);
 		}
 
 		if (isBezierCurve)
