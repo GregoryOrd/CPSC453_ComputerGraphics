@@ -851,20 +851,20 @@ int main() {
 		}
 		else if(sceneNumber == 1)
 		{
-			ImGui::Text("Note: the camera is reset to the original starting position everytime you change scenes.");
+			ImGui::Text("Note: the camera is reset to the original starting position everytime\nyou change scenes.");
 			ImGui::Text("Press \"g\" to switch to the 2D curve editor.");
 			ImGui::Text("Press \"j\" to switch to the 3D surface of revolution scene view.");
 			ImGui::Text("Press \"f\" to toggle showing the zx-plane grid.");
 		}
 		else if (sceneNumber == 2)
 		{
-			ImGui::Text("Note: the camera is reset to the original starting position everytime you change scenes.");
+			ImGui::Text("Note: the camera is reset to the original starting position everytime\nyou change scenes.");
 			ImGui::Text("Press \"g\" to switch to the 2D curve editor.");
 			ImGui::Text("Press \"h\" to switch to the 3D curve viewer.");
 			ImGui::Text("Press \"t\" to toggle between wireframe and filled.");
 		}
 
-		if (sceneNumber < 3)
+		if (sceneNumber < 2)
 		{
 			if (isBezierCurve)
 			{
