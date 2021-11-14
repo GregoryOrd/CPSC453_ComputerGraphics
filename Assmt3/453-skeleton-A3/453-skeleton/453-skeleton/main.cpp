@@ -34,6 +34,7 @@ const int numPointsOnGeneratedCurve = 1000;
 bool isBezierCurve = true;
 bool showControlPolygon = true;
 bool showControlPoints = true;
+bool showFloorGrid = true;
 bool using2DEditView = true;
 const float cameraTranslationIncrement = 0.01f;
 const float floorGridStep = 0.05f;
@@ -311,6 +312,10 @@ public:
 			else if (key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
 			{
 				camera_.moveDown();
+			}
+			else if (key == GLFW_KEY_F && action == GLFW_PRESS)
+			{
+				showFloorGrid = !showFloorGrid;
 			}
 		}
 		if (key == GLFW_KEY_G && action == GLFW_PRESS)
@@ -651,7 +656,7 @@ int main() {
 			glDrawArrays(GL_LINE_STRIP, 0, GLsizei(square.verts.size()));
 		}
 
-		if (!using2DEditView)
+		if (!using2DEditView && showFloorGrid)
 		{
 			floorGridGPUGeom.bind();
 			for (int i = 0; i < floorGrid.verts.size(); i += 4)
@@ -709,6 +714,7 @@ int main() {
 		else
 		{
 			ImGui::Text("Press \"g\" to switch to the 2D editing view.");
+			ImGui::Text("Press \"f\" to toggle showing the zx-plane grid.");
 		}
 
 
