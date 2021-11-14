@@ -333,7 +333,7 @@ public:
 			}
 		}
 
-		if (sceneNumber == 2)
+		if (sceneNumber >= 2)
 		{
 			if (key == GLFW_KEY_T && action == GLFW_PRESS)
 			{
@@ -521,7 +521,7 @@ void dragSelectedPoint(Assignment3& a3, CPU_Geometry& square, GPU_Geometry& poin
 		a3.updateLines();
 	}
 }
-void deCasteljauBezierGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bezierCurve, GPU_Geometry& bezierGPUGeom)
+void deCasteljauBezierGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bezierCurve)
 {
 	if (controlPointsGeom.verts.size() >= 2)
 	{
@@ -545,9 +545,17 @@ void deCasteljauBezierGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& be
 			bezierCurve.verts.push_back(intermediatePoints[0]);
 			bezierCurve.cols.push_back(generatedCurveColour);
 		}
-
-		updateGPUGeometry(bezierGPUGeom, bezierCurve);
 	}
+}
+std::vector<glm::vec3> deCasteljauGeneratorWithReturn(std::vector<glm::vec3> controlPoints)
+{
+	CPU_Geometry bezierCurve;
+	CPU_Geometry controlPointsGeom;
+	controlPointsGeom.verts = controlPoints;
+
+	deCasteljauBezierGenerator(controlPointsGeom, bezierCurve);
+
+	return bezierCurve.verts;
 }
 void bsplineGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bsplineCurve, GPU_Geometry& bsplineGPUGeom)
 {
@@ -665,6 +673,66 @@ void generateSurfaceOfRevolution(CPU_Geometry bsplineCurve, CPU_Geometry& genera
 	updateGPUGeometry(generatedSurfaceGPUGeom, generatedSurface);
 }
 
+void generateTensorProductSurface(std::vector<std::vector<glm::vec3>> controlPoints, CPU_Geometry& tensorProductSurface, GPU_Geometry& tensorProductSurfaceGPUGeom)
+{
+	tensorProductSurface.verts.clear();
+	tensorProductSurface.cols.clear();
+
+	std::vector<std::vector<glm::vec3>> rows;
+	std::vector<std::vector<glm::vec3>> columns;
+	int d = controlPoints[0].size();
+	for (int i = 0; i < d; i++)
+	{
+		std::vector<glm::vec3> controlPointColumn;
+		for (int j = 0; j < d; j++)
+		{
+			controlPointColumn.push_back(controlPoints[j][i]);
+		}
+		columns.push_back(deCasteljauGeneratorWithReturn(controlPointColumn));
+		rows.push_back(deCasteljauGeneratorWithReturn(controlPoints[i]));
+	}
+
+	for (int i = 0; i < rows.size() - 1; i++)
+	{
+		for (int j = 0; j < rows[i].size() - 1; j++)
+		{
+			tensorProductSurface.verts.push_back(rows[i][j]);
+			tensorProductSurface.verts.push_back(rows[i][j + 1]);
+			tensorProductSurface.verts.push_back(rows[i + 1][j + 1]);
+
+			tensorProductSurface.verts.push_back(rows[i + 1][j + 1]);
+			tensorProductSurface.verts.push_back(rows[i + 1][j]);
+			tensorProductSurface.verts.push_back(rows[i][j]);
+
+			for (int k = 0; k < 6; k++)
+			{
+				tensorProductSurface.cols.push_back(generatedCurveColour);
+			}
+		}
+	}
+
+	for (int i = 0; i < columns.size() - 1; i++)
+	{
+		for (int j = 0; j < columns[i].size() - 1; j++)
+		{
+			tensorProductSurface.verts.push_back(columns[i][j]);
+			tensorProductSurface.verts.push_back(columns[i][j + 1]);
+			tensorProductSurface.verts.push_back(columns[i + 1][j + 1]);
+
+			tensorProductSurface.verts.push_back(columns[i + 1][j + 1]);
+			tensorProductSurface.verts.push_back(columns[i + 1][j]);
+			tensorProductSurface.verts.push_back(columns[i][j]);
+
+			for (int k = 0; k < 6; k++)
+			{
+				tensorProductSurface.cols.push_back(generatedCurveColour);
+			}
+		}
+	}
+
+	updateGPUGeometry(tensorProductSurfaceGPUGeom, tensorProductSurface);
+}
+
 int main() {
 	Log::debug("Starting main");
 
@@ -729,7 +797,8 @@ int main() {
 		{
 			if (isBezierCurve)
 			{
-				deCasteljauBezierGenerator(square, generatedCurve, generatedGPUGeom);
+				deCasteljauBezierGenerator(square, generatedCurve);
+				updateGPUGeometry(generatedGPUGeom, generatedCurve);
 			}
 			else
 			{
@@ -818,8 +887,39 @@ int main() {
 		}
 		else if (sceneNumber == 3)
 		{
+			int d = 3;
+			std::vector<std::vector<glm::vec3>> controlPointsFirstExample = {
+				{{0.0f, -0.4f, 0.0f}, {0.0f, -0.4f, 0.2f}, {0.0f, -0.4f, 0.4f}},
+				{{0.2f, -0.4f, 0.0f}, {0.2f, 0.5f, 0.2f}, {0.2f, -0.4f, 0.4f}},
+				{{0.4f, -0.4f, 0.0f}, {0.4f, -0.4f, 0.2f}, {0.4f, -0.4f, 0.4f}}
+			};
+			std::vector<std::vector<glm::vec3>> controlPointsSecondExample = {
+				{{-1.0f, -0.4f, 0.0f}, {-0.8f, -0.4f, 0.3f}, {-0.6f, -0.4f, 0.0f}, {-0.4f, -0.4f, 0.3f}},
+				{{-1.0f, -0.2f, 0.0f}, {-0.8f, -0.2f, 0.3f}, {-0.6f, -0.2f, 0.0f}, {-0.4f, -0.2f, 0.3f}},
+				{{-1.0f, 0.0f, 0.0f}, {-0.8f, 0.0f, 0.3f}, {-0.6f, 0.0f, 0.0f}, {-0.4f, 0.0f, 0.3f}},
+				{{-1.0f, 0.2f, 0.0f}, {-0.8f, 0.2f, 0.03}, {-0.6f, 0.2f, 0.0f}, {-0.4f, 0.2f, 0.3f}}
+			};
 
-		}
+			CPU_Geometry tensorProductSurface;
+			GPU_Geometry tensorProductSurfaceGPUGeom;
+
+			if (wireFrame)
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			}
+			else
+			{
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			}
+
+			generateTensorProductSurface(controlPointsFirstExample, tensorProductSurface, tensorProductSurfaceGPUGeom);
+			tensorProductSurfaceGPUGeom.bind();
+			glDrawArrays(GL_TRIANGLES, 0, GLsizei(tensorProductSurface.verts.size()));
+
+			generateTensorProductSurface(controlPointsSecondExample, tensorProductSurface, tensorProductSurfaceGPUGeom);
+			tensorProductSurfaceGPUGeom.bind();
+			glDrawArrays(GL_TRIANGLES, 0, GLsizei(tensorProductSurface.verts.size()));
+}
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
