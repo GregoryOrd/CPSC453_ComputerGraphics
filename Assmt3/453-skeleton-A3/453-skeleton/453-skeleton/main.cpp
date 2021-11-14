@@ -30,7 +30,9 @@ const glm::vec3 selectedColour = { 0.f, 0.f, 1.0f };
 const glm::vec3 nonSelectedColour = { 1.f, 0.0f, 0.0f };
 const glm::vec3 generatedCurveColour = { 0.f, 0.0f, 1.0f };
 const float collisionThreshold = 0.01f;
-const int numPointsOnGeneratedCurve = 1000;
+const int numPointsOnGeneratedCurve = 100;
+const int numPointsOnGeneratedSurfaceCurves = 5;
+bool bsplineGeneratedForSurface = false;
 bool isBezierCurve = true;
 bool showControlPolygon = true;
 bool showControlPoints = true;
@@ -38,6 +40,7 @@ bool showFloorGrid = true;
 int sceneNumber = 0;
 const float cameraTranslationIncrement = 0.01f;
 const float floorGridStep = 0.05f;
+CPU_Geometry bsplineCurve_;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry &gpuGeom, CPU_Geometry const &cpuGeom) {
@@ -130,6 +133,13 @@ public:
 	glm::vec3 direction()
 	{
 		return center_ - eye_;
+	}
+
+	void reset()
+	{
+		eye_ = { 0.0f, 0.0f, 1.0f };
+		center_ = { 0.0f, 0.0f, 0.0f };
+		upVector_ = { 0.0f, -1.0f, 0.0f };
 	}
 
 private:
@@ -327,11 +337,13 @@ public:
 		{
 			//3D Curve Viewer
 			sceneNumber = 1;
+			camera_.reset();
 		}
 		else if (key == GLFW_KEY_J && action == GLFW_PRESS)
 		{
 			//3D Surface of Revolution Viewer
 			sceneNumber = 2;
+			camera_.reset();
 		}
 	}
 
@@ -553,6 +565,8 @@ void bsplineGenerator(CPU_Geometry controlPointsGeom, CPU_Geometry& bsplineCurve
 			bsplineCurve.cols.push_back(generatedCurveColour);
 		}
 
+		bsplineCurve_ = bsplineCurve;
+		bsplineGeneratedForSurface = true;
 		updateGPUGeometry(bsplineGPUGeom, bsplineCurve);
 	}
 }
@@ -581,6 +595,42 @@ void generateFloorGrid(CPU_Geometry& floorGrid, GPU_Geometry& floorGridGPUGeom)
 	updateGPUGeometry(floorGridGPUGeom, floorGrid);
 }
 
+void generateSurfaceOfRevolution(CPU_Geometry bsplineCurve, CPU_Geometry& generatedSurface, GPU_Geometry& generatedSurfaceGPUGeom)
+{
+	generatedSurface.verts.clear();
+	int numPointsOnSurfaceCurves = bsplineCurve.verts.size() - 1;
+	for (int u = 0; u < numPointsOnSurfaceCurves; u++)
+	{
+		for (float v = 0; v < 2 * PI; v += (2.0f * PI / (float)numPointsOnSurfaceCurves))
+		{
+			float surfaceXAtUV = bsplineCurve.verts[u][0] * cos(v);
+			float surfaceYAtUV = bsplineCurve.verts[u][1];
+			float surfaceZAtUV = bsplineCurve.verts[u][0] * sin(v);
+			glm::vec3 surfaceAtUV = { surfaceXAtUV , surfaceYAtUV , surfaceZAtUV };
+
+			float surfaceXAtUPlusOneAndV = bsplineCurve.verts[(u+1)][0] * cos(v);
+			float surfaceYAtUPlusOneAndV = bsplineCurve.verts[(u+1)][1];
+			float surfaceZAtUPlusOneAndV = bsplineCurve.verts[(u+1)][0] * sin(v);
+			glm::vec3 surfaceAtUPlusOneAndV  = { surfaceXAtUPlusOneAndV , surfaceYAtUPlusOneAndV , surfaceZAtUPlusOneAndV };
+
+			float surfaceXAtUAndVPlusOne = bsplineCurve.verts[(u + 1)][0] * cos(v + (2 * PI / numPointsOnGeneratedCurve));
+			float surfaceYAtUAndVPlusOne = bsplineCurve.verts[(u + 1)][1];
+			float surfaceZAtUAndVPlusOne = bsplineCurve.verts[(u + 1)][0] * sin(v + (2 * PI / numPointsOnGeneratedCurve));
+			glm::vec3 surfaceAtUAndVPlusOne = { surfaceXAtUAndVPlusOne , surfaceYAtUAndVPlusOne , surfaceZAtUAndVPlusOne };
+			
+			generatedSurface.verts.push_back(surfaceAtUV);
+			generatedSurface.verts.push_back(surfaceAtUPlusOneAndV);
+			generatedSurface.verts.push_back(surfaceAtUAndVPlusOne);
+
+			generatedSurface.cols.push_back(generatedCurveColour);
+			generatedSurface.cols.push_back(generatedCurveColour);
+			generatedSurface.cols.push_back(generatedCurveColour);
+		}
+	}
+
+	updateGPUGeometry(generatedSurfaceGPUGeom, generatedSurface);
+}
+
 int main() {
 	Log::debug("Starting main");
 
@@ -598,10 +648,13 @@ int main() {
 
 	CPU_Geometry square;
 	CPU_Geometry generatedCurve;
+	CPU_Geometry generatedSurface;
+	CPU_Geometry floorGrid;
+
 	GPU_Geometry pointsGPUGeom;
 	GPU_Geometry linesGPUGeom;
 	GPU_Geometry generatedGPUGeom;
-	CPU_Geometry floorGrid;
+	GPU_Geometry generatedSurfaceGPUGeom;
 	GPU_Geometry floorGridGPUGeom;
 
 	glm::mat4 projectionMatrix = camera.perspectiveMatrix();
@@ -642,13 +695,16 @@ int main() {
 			dragCamera(*a3);
 		}
 
-		if (isBezierCurve)
+		if (sceneNumber < 2)
 		{
-			deCasteljauBezierGenerator(square, generatedCurve, generatedGPUGeom);
-		}
-		else
-		{
-			bsplineGenerator(square, generatedCurve, generatedGPUGeom);
+			if (isBezierCurve)
+			{
+				deCasteljauBezierGenerator(square, generatedCurve, generatedGPUGeom);
+			}
+			else
+			{
+				bsplineGenerator(square, generatedCurve, generatedGPUGeom);
+			}
 		}
 
 		shader.use();
@@ -678,6 +734,7 @@ int main() {
 
 			generatedGPUGeom.bind();
 			glDrawArrays(GL_LINE_STRIP, 0, GLsizei(generatedCurve.verts.size()));
+			bsplineGeneratedForSurface = false;
 		}
 		else if (sceneNumber == 1)
 		{
@@ -705,10 +762,20 @@ int main() {
 
 			generatedGPUGeom.bind();
 			glDrawArrays(GL_LINE_STRIP, 0, GLsizei(generatedCurve.verts.size()));
+			bsplineGeneratedForSurface = false;
 		}
 		else if (sceneNumber == 2)
 		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			if (!bsplineGeneratedForSurface)
+			{
+				bsplineGenerator(square, generatedCurve, generatedGPUGeom); //Use b-spline curve for surface of revolution
+				bsplineGeneratedForSurface = true;
+			}
+			generateSurfaceOfRevolution(bsplineCurve_, generatedSurface, generatedSurfaceGPUGeom);
 
+			generatedSurfaceGPUGeom.bind();
+			glDrawArrays(GL_TRIANGLES, 0, GLsizei(generatedSurface.verts.size()));
 		}
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
@@ -751,24 +818,28 @@ int main() {
 		}
 		else if(sceneNumber == 1)
 		{
+			ImGui::Text("Note: the camera is reset to the original starting position everytime you change scenes.");
 			ImGui::Text("Press \"g\" to switch to the 2D curve editor.");
 			ImGui::Text("Press \"j\" to switch to the 3D surface of revolution scene view.");
 			ImGui::Text("Press \"f\" to toggle showing the zx-plane grid.");
 		}
 		else if (sceneNumber == 2)
 		{
+			ImGui::Text("Note: the camera is reset to the original starting position everytime you change scenes.");
 			ImGui::Text("Press \"g\" to switch to the 2D curve editor.");
 			ImGui::Text("Press \"h\" to switch to the 3D curve viewer.");
 		}
 
-
-		if (isBezierCurve)
+		if (sceneNumber < 3)
 		{
-			ImGui::Text("Curve Type: Bezier");
-		}
-		else
-		{
-			ImGui::Text("Curve Type: B-Spline");
+			if (isBezierCurve)
+			{
+				ImGui::Text("Curve Type: Bezier");
+			}
+			else
+			{
+				ImGui::Text("Curve Type: B-Spline");
+			}
 		}
 		ImGui::PopStyleColor();
 
