@@ -199,40 +199,9 @@ void negativeYFace(std::vector<glm::vec3> const &originQuad, CPU_Geometry &geom)
 	geom.normals.push_back(glm::vec3(0.0, -1.0, 0.0));
 }
 
-glm::vec3 generatePerVertexNormal(glm::vec3 vertex/*, std::vector<glm::vec3> adjacentVertexes*/)
+glm::vec3 generatePerVertexNormal(glm::vec3 vertex, glm::vec3 sphereCentre)
 {
-	/*glm::vec3 phiIncremented = adjacentVertexes[0];
-	glm::vec3 phiIncrementedThetaDecremented = adjacentVertexes[1];
-	glm::vec3 thetaDecremented = adjacentVertexes[2];
-	glm::vec3 phiDecremented = adjacentVertexes[3];
-	glm::vec3 thetaIncrementedPhiDecremented = adjacentVertexes[4];
-	glm::vec3 thetaIncremented = adjacentVertexes[5];
-
-	glm::vec3 adjacentVector1 = phiIncremented - vertex;
-	glm::vec3 adjacentVector2 = phiIncrementedThetaDecremented - vertex;
-	glm::vec3 adjacentVector3 = thetaDecremented - vertex;
-	glm::vec3 adjacentVector4 = phiDecremented - vertex;
-	glm::vec3 adjacentVector5 = thetaIncrementedPhiDecremented - vertex;
-	glm::vec3 adjacentVector6 = thetaIncremented - vertex;
-
-	std::vector<glm::vec3> adjacentNormals;
-	adjacentNormals.push_back(glm::cross(adjacentVector1, adjacentVector2));
-	adjacentNormals.push_back(glm::cross(adjacentVector2, adjacentVector3));
-	adjacentNormals.push_back(glm::cross(adjacentVector3, adjacentVector4));
-	adjacentNormals.push_back(glm::cross(adjacentVector4, adjacentVector5));
-	adjacentNormals.push_back(glm::cross(adjacentVector5, adjacentVector6));
-	adjacentNormals.push_back(glm::cross(adjacentVector6, adjacentVector1));
-
-	glm::vec3 vertexNormal = { 0.0f, 0.0f, 0.0f };
-
-	for (glm::vec3 normal : adjacentNormals)
-	{
-		vertexNormal = vertexNormal + normal;
-	}
-	return vertexNormal / 6.0f;*/
-	//return glm::vec3(1.0f, 0.0f, 0.0f);
-	glm::vec3 origin = { 0.0f, 0.0f, 0.0f };
-	return vertex - origin;
+	return vertex - sphereCentre;
 }
 
 glm::vec3 findSphericalCoordinate(float radius, float theta, float phi)
@@ -240,29 +209,27 @@ glm::vec3 findSphericalCoordinate(float radius, float theta, float phi)
 	return glm::vec3(radius* cos(theta)* sin(phi), radius* sin(theta)* sin(phi), radius* cos(phi));
 }
 
-void generateSphere(CPU_Geometry& sphere)
+void generateSphere(CPU_Geometry& sphere, float radius, float step, glm::vec3 sphereTranslation)
 {
 	sphere.verts.clear();
 	sphere.normals.clear();
 
-	float radius = 0.5f;
-	float step = 0.1f;
 	for (float theta = 0.0f; theta <= 2 * PI; theta += step)
 	{
 		for (float phi = 0.0f; phi <= PI; phi += step)
 		{
-			glm::vec3 currentPoint = findSphericalCoordinate(radius, theta, phi);
+			glm::vec3 currentPoint = findSphericalCoordinate(radius, theta, phi) + sphereTranslation;
 
-			glm::vec3 phiIncremented = findSphericalCoordinate(radius, theta, phi + step);
-			glm::vec3 phiDecremented = findSphericalCoordinate(radius, theta, phi - step);
+			glm::vec3 phiIncremented = findSphericalCoordinate(radius, theta, phi + step) + sphereTranslation;
+			glm::vec3 phiDecremented = findSphericalCoordinate(radius, theta, phi - step) + sphereTranslation;
 
-			glm::vec3 thetaIncremented = findSphericalCoordinate(radius, theta + step, phi);
-			glm::vec3 thetaDecremented = findSphericalCoordinate(radius, theta - step, phi);
+			glm::vec3 thetaIncremented = findSphericalCoordinate(radius, theta + step, phi) + sphereTranslation;
+			glm::vec3 thetaDecremented = findSphericalCoordinate(radius, theta - step, phi) + sphereTranslation;
 
-			glm::vec3 phiIncrementedThetaDecremented = findSphericalCoordinate(radius, theta - step, phi + step);
-			glm::vec3 thetaIncrementedPhiDecremented = findSphericalCoordinate(radius, theta + step, phi - step);
+			glm::vec3 phiIncrementedThetaDecremented = findSphericalCoordinate(radius, theta - step, phi + step) + sphereTranslation;
+			glm::vec3 thetaIncrementedPhiDecremented = findSphericalCoordinate(radius, theta + step, phi - step) + sphereTranslation;
 
-			glm::vec3 bothIncremented =  findSphericalCoordinate(radius, theta + step, phi + step);
+			glm::vec3 bothIncremented =  findSphericalCoordinate(radius, theta + step, phi + step) + sphereTranslation;
 
 			sphere.verts.push_back(phiIncremented);
 			sphere.verts.push_back(currentPoint);
@@ -273,12 +240,12 @@ void generateSphere(CPU_Geometry& sphere)
 			sphere.verts.push_back(thetaIncremented);
 
 			std::vector<glm::vec3> adjacents = { phiIncremented, phiIncrementedThetaDecremented, thetaDecremented, phiDecremented, thetaIncrementedPhiDecremented, thetaIncremented };
-			sphere.normals.push_back(generatePerVertexNormal(phiIncremented));
-			sphere.normals.push_back(generatePerVertexNormal(currentPoint));
-			sphere.normals.push_back(generatePerVertexNormal(thetaIncremented));
-			sphere.normals.push_back(generatePerVertexNormal(bothIncremented));
-			sphere.normals.push_back(generatePerVertexNormal(phiIncremented));
-			sphere.normals.push_back(generatePerVertexNormal(thetaIncremented));
+			sphere.normals.push_back(generatePerVertexNormal(phiIncremented, sphereTranslation));
+			sphere.normals.push_back(generatePerVertexNormal(currentPoint, sphereTranslation));
+			sphere.normals.push_back(generatePerVertexNormal(thetaIncremented, sphereTranslation));
+			sphere.normals.push_back(generatePerVertexNormal(bothIncremented, sphereTranslation));
+			sphere.normals.push_back(generatePerVertexNormal(phiIncremented, sphereTranslation));
+			sphere.normals.push_back(generatePerVertexNormal(thetaIncremented, sphereTranslation));
 		}
 	}
 }
@@ -301,45 +268,14 @@ int main() {
 
 	ShaderProgram shader("shaders/test.vert", "shaders/test.frag");
 
-	// The current CPU_Geometry and GPU_Geometry classes are defined in
-	// Geometry.h/Geometry.cpp They will work for this assignment, but for some of
-	// the bonuses you may have to modify them.
+	glm::vec3 sphereTranslation = { -0.2f, 0.0f, 0.0f };
 
-	std::vector<glm::vec3> originQuad;
-	originQuad.push_back(glm::vec3{-0.5, 0.5, 0}); // top-left
-	originQuad.push_back(glm::vec3{-0.5, -0.5, 0}); // bottom-left
-	originQuad.push_back(glm::vec3{0.5, 0.5, 0}); // top-right
+	CPU_Geometry sphere;
+	generateSphere(sphere, 0.25f, 0.1f, sphereTranslation);
+	sphere.cols.resize(sphere.verts.size(), glm::vec3{1.0, 0.0, 0.0});
 
-	originQuad.push_back(glm::vec3{-0.5, -0.5, 0}); // bottom-left
-	originQuad.push_back(glm::vec3{0.5, -0.5, 0}); // bottom-right
-	originQuad.push_back(glm::vec3{0.5, 0.5, 0}); // top-right
-
-	CPU_Geometry square;
-	/*positiveZFace(originQuad, square);
-	positiveXFace(originQuad, square);
-	negativeZFace(originQuad, square);
-	negativeXFace(originQuad, square);
-	positiveYFace(originQuad, square);
-	negativeYFace(originQuad, square);*/
-	generateSphere(square);
-
-	square.cols.resize(square.verts.size(), glm::vec3{1.0, 0.0, 0.0});
-	std::cout << "The sphere has " << square.verts.size() << " verts" << std::endl;
-	std::cout << "The sphere has " << square.normals.size() << " normals" << std::endl;
-	/*colouredTriangles(square);
-	colouredTriangles(square);
-	colouredTriangles(square);
-	colouredTriangles(square);
-	colouredTriangles(square);
-	colouredTriangles(square);*/
-
-
-	/*for(auto i = square.verts.begin(); i < square.verts.end(); ++i) {
-		std::cout << *i << std::endl;
-	}*/
-
-	GPU_Geometry quads;
-	updateGPUGeometry(quads, square);
+	GPU_Geometry sphereGpuGeom;
+	updateGPUGeometry(sphereGpuGeom, sphere);
 
 	// RENDER LOOP
 	while (!window.shouldClose()) {
@@ -358,8 +294,8 @@ int main() {
 
 		a4->viewPipeline(shader);
 
-		quads.bind();
-		glDrawArrays(GL_TRIANGLES, 0, GLsizei(square.verts.size()));
+		sphereGpuGeom.bind();
+		glDrawArrays(GL_TRIANGLES, 0, GLsizei(sphere.verts.size()));
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
