@@ -192,7 +192,8 @@ void negativeYFace(std::vector<glm::vec3> const &originQuad, CPU_Geometry &geom)
 
 glm::vec3 generatePerVertexNormal(glm::vec3 vertex, glm::vec3 sphereCentre)
 {
-	return vertex - sphereCentre;
+	glm::vec3 normalVector = vertex - sphereCentre;
+	return normalVector / glm::length(normalVector);
 }
 
 glm::vec3 findSphericalCoordinate(float radius, float theta, float phi)
