@@ -18,7 +18,7 @@
 // List of vertices and texture coordinates using std::vector and glm::vec3
 struct CPU_Geometry {
 	std::vector<glm::vec3> verts;
-	std::vector<glm::vec3> cols;
+	std::vector<glm::vec2> texCoords;
 	std::vector<glm::vec3> normals;
 };
 
@@ -33,7 +33,7 @@ public:
 	void bind() { vao.bind(); }
 
 	void setVerts(const std::vector<glm::vec3>& verts);
-	void setCols(const std::vector<glm::vec3>& cols);
+	void setTexCoords(const std::vector<glm::vec2>& texCoords);
 	void setNormals(const std::vector<glm::vec3>& norms);
 
 private:
@@ -42,6 +42,6 @@ private:
 	VertexArray vao;
 
 	VertexBuffer vertBuffer;
-	VertexBuffer colorsBuffer;
+	VertexBuffer texCoordBuffer;
 	VertexBuffer normalsBuffer;
 };

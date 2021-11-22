@@ -106,6 +106,11 @@ foreach(file ${files})
 	configure_file(${file} shaders/${name})
 endforeach()
 
+configure_file(textures/ship.png textures/ship.png COPYONLY)
+configure_file(textures/diamond.png textures/diamond.png COPYONLY)
+configure_file(textures/fire.png textures/fire.png COPYONLY)
+configure_file(textures/earthmap1k.jpg textures/earthmap1k.jpg COPYONLY)
+
 add_executable(${APP_NAME} ${SOURCES})
 target_include_directories(${APP_NAME} PRIVATE ${INCLUDES})
 target_link_libraries(${APP_NAME} ${LIBRARIES})

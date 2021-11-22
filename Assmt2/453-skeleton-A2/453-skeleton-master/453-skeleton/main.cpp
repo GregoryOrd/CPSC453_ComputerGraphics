@@ -16,7 +16,7 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-#define PI 3.14159265359
+github
 
 //Shader Uniforms
 glm::mat4 globalTransformationMatrix = {

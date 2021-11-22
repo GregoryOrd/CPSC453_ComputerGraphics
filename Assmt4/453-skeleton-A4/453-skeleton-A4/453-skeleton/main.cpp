@@ -26,7 +26,7 @@
 void updateGPUGeometry(GPU_Geometry &gpuGeom, CPU_Geometry const &cpuGeom) {
 	gpuGeom.bind();
 	gpuGeom.setVerts(cpuGeom.verts);
-	gpuGeom.setCols(cpuGeom.cols);
+	gpuGeom.setTexCoords(cpuGeom.texCoords);
 	gpuGeom.setNormals(cpuGeom.normals);
 }
 
@@ -94,15 +94,6 @@ private:
 	double mouseOldY;
 
 };
-
-void colouredTriangles(CPU_Geometry &geom) {
-	geom.cols.push_back(glm::vec3(1.0, 0.0, 0.0));
-	geom.cols.push_back(glm::vec3(1.0, 0.0, 0.0));
-	geom.cols.push_back(glm::vec3(1.0, 0.0, 0.0));
-	geom.cols.push_back(glm::vec3(1.0, 0.0, 0.0));
-	geom.cols.push_back(glm::vec3(1.0, 0.0, 0.0));
-	geom.cols.push_back(glm::vec3(1.0, 0.0, 0.0));
-}
 
 void positiveZFace(std::vector<glm::vec3> const &originQuad, CPU_Geometry &geom) {
 	const glm::mat4 T = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, 0.5));
@@ -209,6 +200,11 @@ glm::vec3 findSphericalCoordinate(float radius, float theta, float phi)
 	return glm::vec3(radius* cos(theta)* sin(phi), radius* sin(theta)* sin(phi), radius* cos(phi));
 }
 
+glm::vec2 findTextureCoordinate(float theta, float phi)
+{
+	return glm::vec2(theta / (2 * PI), phi / PI);
+}
+
 void generateSphere(CPU_Geometry& sphere, float radius, float step, glm::vec3 sphereTranslation)
 {
 	sphere.verts.clear();
@@ -235,9 +231,17 @@ void generateSphere(CPU_Geometry& sphere, float radius, float step, glm::vec3 sp
 			sphere.verts.push_back(currentPoint);
 			sphere.verts.push_back(thetaIncremented);
 
+			sphere.texCoords.push_back(findTextureCoordinate(theta, phi + step));
+			sphere.texCoords.push_back(findTextureCoordinate(theta, phi));
+			sphere.texCoords.push_back(findTextureCoordinate(theta + step, phi));
+
 			sphere.verts.push_back(bothIncremented);
 			sphere.verts.push_back(phiIncremented);
 			sphere.verts.push_back(thetaIncremented);
+
+			sphere.texCoords.push_back(findTextureCoordinate(theta + step, phi + step));
+			sphere.texCoords.push_back(findTextureCoordinate(theta, phi + step));
+			sphere.texCoords.push_back(findTextureCoordinate(theta + step, phi));
 
 			std::vector<glm::vec3> adjacents = { phiIncremented, phiIncrementedThetaDecremented, thetaDecremented, phiDecremented, thetaIncrementedPhiDecremented, thetaIncremented };
 			sphere.normals.push_back(generatePerVertexNormal(phiIncremented, sphereTranslation));
@@ -268,14 +272,15 @@ int main() {
 
 	ShaderProgram shader("shaders/test.vert", "shaders/test.frag");
 
-	glm::vec3 sphereTranslation = { -0.2f, 0.0f, 0.0f };
+	glm::vec3 sphereTranslation = { 0.0f, 0.0f, 0.0f };
 
 	CPU_Geometry sphere;
 	generateSphere(sphere, 0.25f, 0.1f, sphereTranslation);
-	sphere.cols.resize(sphere.verts.size(), glm::vec3{1.0, 0.0, 0.0});
 
 	GPU_Geometry sphereGpuGeom;
 	updateGPUGeometry(sphereGpuGeom, sphere);
+
+	Texture sphereTexture("textures/earthmap1k.jpg", GL_NEAREST);
 
 	// RENDER LOOP
 	while (!window.shouldClose()) {
@@ -295,7 +300,9 @@ int main() {
 		a4->viewPipeline(shader);
 
 		sphereGpuGeom.bind();
+		sphereTexture.bind();
 		glDrawArrays(GL_TRIANGLES, 0, GLsizei(sphere.verts.size()));
+		sphereTexture.unbind();
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
