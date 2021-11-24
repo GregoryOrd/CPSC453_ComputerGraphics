@@ -29,6 +29,10 @@ const float earthToSun = 147.71e6; //km
 const float moonSize = 1737.4f; //km
 const float moonToEarth = 384400 * 10; //km
 const float backdropSphereSize = sunSize;
+const float earthOrbitalInclination = 0.4101524f;
+const float moonOrbitalInclination = 0.08979719f;
+const float earthRotationIncrement = 0.05f;
+const float moonRotationIncrement = 0.1f;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry& gpuGeom, CPU_Geometry const& cpuGeom) {
@@ -41,12 +45,15 @@ void updateGPUGeometry(GPU_Geometry& gpuGeom, CPU_Geometry const& cpuGeom) {
 class Planet //Includes sun and moon 
 {
 public:
-	Planet(float actualSize, const char* texturePath, Planet* parent = NULL, float actualDistanceFromParent = 0.0f, float rotationAngle = PI/2)
+	Planet(float actualSize, const char* texturePath, Planet* parent = NULL, float actualDistanceFromParent = 0.0f, float orbitalInclination = 0.0f, float rotationIncrement = 0.0f, float rotationAngle = PI / 2)
 		: size_((actualSize /sunSize) * sunDisplaySize)
 		, distanceFromParent_((actualDistanceFromParent / sunSize) * sunDisplaySize / 100)
+		, orbitalInclination_(orbitalInclination)
 		, rotationAngle_(rotationAngle)
+		, rotationIncrement_(rotationIncrement)
 		, parent_(parent)
 		, texture_(texturePath, GL_NEAREST)
+		, invertNormals_(false)
 	{
 		if (parent_ != NULL)
 		{
@@ -54,8 +61,15 @@ public:
 		}
 	}
 
+	void rotate()
+	{
+		rotationAngle_ += rotationIncrement_;
+		generateGeometry(invertNormals_);
+	}
+
 	void generateGeometry(bool invertNormals)
 	{
+		invertNormals_ = invertNormals;
 		generateSphere(size_, sphereParameterStep, location(), invertNormals);
 		updateGeometry();
 	}
@@ -64,7 +78,11 @@ public:
 	{
 		if (parent_ != NULL)
 		{
-			glm::vec3 positionRelativeToParent = { distanceFromParent_ * cos(rotationAngle_), 0.0f, -distanceFromParent_ * sin(rotationAngle_) };
+			glm::vec3 positionRelativeToParent = {
+				distanceFromParent_* sin(rotationAngle_),
+				distanceFromParent_ * sin(orbitalInclination_) * sin(rotationAngle_),
+				distanceFromParent_ * cos(rotationAngle_) };
+
 			return positionRelativeToParent + parent_->location();
 		}
 		else
@@ -170,9 +188,12 @@ private:
 	const Planet const* parent_;
 	float distanceFromParent_;
 	float rotationAngle_;
+	float orbitalInclination_;
+	float rotationIncrement_;
 	Texture texture_;
 	CPU_Geometry cpuGeom_;
 	GPU_Geometry gpuGeom_;
+	bool invertNormals_;
 };
 
 // EXAMPLE CALLBACKS
@@ -259,13 +280,13 @@ int main() {
 	Planet sun(sunSize, "textures/sunmap.jpg");
 	sun.generateGeometry(false);
 
-	Planet earth(earthSize, "textures/earthmap1k.jpg", &sun, earthToSun);
+	Planet earth(earthSize, "textures/earthmap1k.jpg", &sun, earthToSun, earthOrbitalInclination, earthRotationIncrement);
 	earth.generateGeometry(false);
 
 	//Source didn't have a moon texture map, so using pluto texture map for moon
 	//Also scaling up the size of the moon and the distance to earth these values are so small relative
 	//to the size of the sun
-	Planet moon(moonSize * 2, "textures/plutomap1k.jpg", &earth, moonToEarth * 10);
+	Planet moon(moonSize * 2, "textures/plutomap1k.jpg", &earth, moonToEarth * 10, moonOrbitalInclination, moonRotationIncrement);
 	moon.generateGeometry(false);
 
 	Planet starBackdrop((sunSize / 0.3f) * 20, "textures/starfield.jpg");
@@ -290,7 +311,9 @@ int main() {
 
 		sun.draw();
 		earth.draw();
+		earth.rotate();
 		moon.draw();
+		moon.rotate();
 		starBackdrop.draw();
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
