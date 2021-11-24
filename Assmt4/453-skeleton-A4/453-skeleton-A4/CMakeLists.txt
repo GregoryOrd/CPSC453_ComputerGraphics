@@ -110,6 +110,7 @@ configure_file(textures/mars_1k_color.jpg textures/mars_1k_color.jpg COPYONLY)
 configure_file(textures/earthmap1k.jpg textures/earthmap1k.jpg COPYONLY)
 configure_file(textures/sunmap.jpg textures/sunmap.jpg COPYONLY)
 configure_file(textures/plutomap1k.jpg textures/plutomap1k.jpg COPYONLY)
+configure_file(textures/starfield.jpg textures/starfield.jpg COPYONLY)
 
 add_executable(${APP_NAME} ${SOURCES})
 target_include_directories(${APP_NAME} PRIVATE ${INCLUDES})

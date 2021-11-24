@@ -28,8 +28,7 @@ const float earthSize = 6371.0f; //km
 const float earthToSun = 147.71e6; //km
 const float moonSize = 1737.4f; //km
 const float moonToEarth = 384400 * 10; //km
-const float marsSize = 3389.5; //km
-const float marsToSun = 238.23e6; //km
+const float backdropSphereSize = sunSize;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry& gpuGeom, CPU_Geometry const& cpuGeom) {
@@ -47,14 +46,17 @@ public:
 		, distanceFromParent_((actualDistanceFromParent / sunSize) * sunDisplaySize / 100)
 		, rotationAngle_(rotationAngle)
 		, parent_(parent)
-		, texturePath_(texturePath)
-		, texture_(texturePath_, GL_NEAREST)
+		, texture_(texturePath, GL_NEAREST)
 	{
 		if (parent_ != NULL)
 		{
 			size_ *= 20;
 		}
-		generateSphere(size_, sphereParameterStep, location());
+	}
+
+	void generateGeometry(bool invertNormals)
+	{
+		generateSphere(size_, sphereParameterStep, location(), invertNormals);
 		updateGeometry();
 	}
 
@@ -90,9 +92,17 @@ public:
 	}
 
 private:
-	glm::vec3 generatePerVertexNormal(glm::vec3 vertex, glm::vec3 sphereCentre)
+	glm::vec3 generatePerVertexNormal(glm::vec3 vertex, glm::vec3 sphereCentre, bool invertNormals)
 	{
-		glm::vec3 normalVector = vertex - sphereCentre;
+		glm::vec3 normalVector;
+		if (invertNormals)
+		{
+			normalVector = sphereCentre - vertex;
+		}
+		else
+		{
+			normalVector = vertex - sphereCentre;
+		}
 		return normalVector / glm::length(normalVector);
 	}
 
@@ -106,7 +116,7 @@ private:
 		return glm::vec2(theta / (2 * PI), phi / PI);
 	}
 
-	void generateSphere(float radius, float step, glm::vec3 sphereTranslation)
+	void generateSphere(float radius, float step, glm::vec3 sphereTranslation, bool invertNormals)
 	{
 		cpuGeom_.verts.clear();
 		cpuGeom_.normals.clear();
@@ -145,19 +155,18 @@ private:
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta + step, phi));
 
 				std::vector<glm::vec3> adjacents = { phiIncremented, phiIncrementedThetaDecremented, thetaDecremented, phiDecremented, thetaIncrementedPhiDecremented, thetaIncremented };
-				cpuGeom_.normals.push_back(generatePerVertexNormal(phiIncremented, sphereTranslation));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(currentPoint, sphereTranslation));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(thetaIncremented, sphereTranslation));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(bothIncremented, sphereTranslation));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(phiIncremented, sphereTranslation));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(thetaIncremented, sphereTranslation));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(phiIncremented, sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(currentPoint, sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(thetaIncremented, sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(bothIncremented, sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(phiIncremented, sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(thetaIncremented, sphereTranslation, invertNormals));
 			}
 		}
 	}
 
 private:
 	float size_;
-	const char* texturePath_;
 	const Planet const* parent_;
 	float distanceFromParent_;
 	float rotationAngle_;
@@ -170,8 +179,7 @@ private:
 class Assignment4 : public CallbackInterface {
 
 public:
-	Assignment4() : camera(0.0, 0.0, 2.0), aspect(1.0f) {
-	}
+	Assignment4() : camera(0.0, 0.0, 2.0), aspect(1.0f) {}
 
 	virtual void keyCallback(int key, int scancode, int action, int mods) {
 	}
@@ -249,13 +257,19 @@ int main() {
 	ShaderProgram shader("shaders/test.vert", "shaders/test.frag");
 
 	Planet sun(sunSize, "textures/sunmap.jpg");
+	sun.generateGeometry(false);
+
 	Planet earth(earthSize, "textures/earthmap1k.jpg", &sun, earthToSun);
+	earth.generateGeometry(false);
 
 	//Source didn't have a moon texture map, so using pluto texture map for moon
 	//Also scaling up the size of the moon and the distance to earth these values are so small relative
 	//to the size of the sun
 	Planet moon(moonSize * 2, "textures/plutomap1k.jpg", &earth, moonToEarth * 10);
-	Planet mars(marsSize, "textures/mars_1k_color.jpg", &sun, marsToSun, (3/2)*PI);
+	moon.generateGeometry(false);
+
+	Planet starBackdrop((sunSize / 0.3f) * 20, "textures/starfield.jpg");
+	starBackdrop.generateGeometry(true);
 
 	// RENDER LOOP
 	while (!window.shouldClose()) {
@@ -277,7 +291,7 @@ int main() {
 		sun.draw();
 		earth.draw();
 		moon.draw();
-		mars.draw();
+		starBackdrop.draw();
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
