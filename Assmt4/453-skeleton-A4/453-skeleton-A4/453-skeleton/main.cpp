@@ -34,8 +34,8 @@ const float earthOrbitalInclination = 0.4101524f;
 const float earthAxialTilt = 0.4101524f;
 const float moonOrbitalInclination = 0.08979719f;
 const float moonAxialTilt = 0.0261799f;
-const float earthOrbitalRotationIncrement = 0.001f;
-const float moonOrbitalRotationIncrement = 0.01f;
+const float earthOrbitalRotationIncrement = 0.1f;
+const float moonOrbitalRotationIncrement = 0.1f;
 const float axialRotationIncrement = 0.01f;
 
 // We gave this code in one of the tutorials, so leaving it here too
