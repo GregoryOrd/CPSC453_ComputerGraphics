@@ -18,6 +18,7 @@
 #include "Camera.h"
 
 #include "glm/glm.hpp"
+#include <glm/gtx/transform.hpp >
 #include "glm/gtc/type_ptr.hpp"
 
 #define PI 3.14159265359
@@ -30,9 +31,12 @@ const float moonSize = 1737.4f; //km
 const float moonToEarth = 384400 * 10; //km
 const float backdropSphereSize = sunSize;
 const float earthOrbitalInclination = 0.4101524f;
+const float earthAxialTilt = 0.4101524f;
 const float moonOrbitalInclination = 0.08979719f;
-const float earthRotationIncrement = 0.05f;
-const float moonRotationIncrement = 0.1f;
+const float moonAxialTilt = 0.0261799f;
+const float earthOrbitalRotationIncrement = 0.05f;
+const float moonOrbitalRotationIncrement = 0.1f;
+const float axialRotationIncrement = 0.05f;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry& gpuGeom, CPU_Geometry const& cpuGeom) {
@@ -45,25 +49,39 @@ void updateGPUGeometry(GPU_Geometry& gpuGeom, CPU_Geometry const& cpuGeom) {
 class Planet //Includes sun and moon 
 {
 public:
-	Planet(float actualSize, const char* texturePath, Planet* parent = NULL, float actualDistanceFromParent = 0.0f, float orbitalInclination = 0.0f, float rotationIncrement = 0.0f, float rotationAngle = PI / 2)
-		: size_((actualSize /sunSize) * sunDisplaySize)
-		, distanceFromParent_((actualDistanceFromParent / sunSize) * sunDisplaySize / 100)
+	Planet(float actualSize, const char* texturePath, Planet* parent = NULL, float actualDistanceFromParent = 0.0f, float orbitalInclination = 0.0f, float axialTilt = 0.0f, float orbitalRotationIncrement = 0.0f)
+		: size_((actualSize / sunSize)* sunDisplaySize)
+		, distanceFromParent_((actualDistanceFromParent / sunSize)* sunDisplaySize / 100)
 		, orbitalInclination_(orbitalInclination)
-		, rotationAngle_(rotationAngle)
-		, rotationIncrement_(rotationIncrement)
+		, orbitalRotationAngle_(PI / 2)
+		, axialRotationAngle_(PI / 2)
+		, orbitalRotationIncrement_(orbitalRotationIncrement)
 		, parent_(parent)
 		, texture_(texturePath, GL_NEAREST)
 		, invertNormals_(false)
+		, axialTilt_(axialTilt)
+		, axisOfRotation_(PI/2)
+		, axialRotationMatrix_(1.0f)
 	{
 		if (parent_ != NULL)
 		{
 			size_ *= 20;
 		}
+
+		float axialAngle = orbitalInclination_ + PI / 2 + axialTilt_;
+		axisOfRotation_ = glm::vec3(glm::rotate(glm::mat4(1.0f), axialAngle, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
 	}
 
-	void rotate()
+	void axialRotation()
 	{
-		rotationAngle_ += rotationIncrement_;
+		axialRotationAngle_ += axialRotationIncrement;
+		axialRotationMatrix_ = glm::rotate(glm::mat4(1.0), axialRotationAngle_, axisOfRotation_);
+		generateGeometry(invertNormals_);
+	}
+
+	void orbitalRotation()
+	{
+		orbitalRotationAngle_ += orbitalRotationIncrement_;
 		generateGeometry(invertNormals_);
 	}
 
@@ -79,9 +97,9 @@ public:
 		if (parent_ != NULL)
 		{
 			glm::vec3 positionRelativeToParent = {
-				distanceFromParent_* sin(rotationAngle_),
-				distanceFromParent_ * sin(orbitalInclination_) * sin(rotationAngle_),
-				distanceFromParent_ * cos(rotationAngle_) };
+				distanceFromParent_* sin(orbitalRotationAngle_),
+				distanceFromParent_ * sin(orbitalInclination_) * sin(orbitalRotationAngle_),
+				distanceFromParent_ * cos(orbitalRotationAngle_) };
 
 			return positionRelativeToParent + parent_->location();
 		}
@@ -134,6 +152,14 @@ private:
 		return glm::vec2(theta / (2 * PI), phi / PI);
 	}
 
+	glm::vec3 applyAxialRotation(glm::vec3 point)
+	{
+		point = point - location();
+		point = glm::vec3(axialRotationMatrix_ * glm::vec4(point, 1.0f));
+		point = point + location();
+		return point;
+	}
+
 	void generateSphere(float radius, float step, glm::vec3 sphereTranslation, bool invertNormals)
 	{
 		cpuGeom_.verts.clear();
@@ -156,29 +182,29 @@ private:
 
 				glm::vec3 bothIncremented = findSphericalCoordinate(radius, theta + step, phi + step) + sphereTranslation;
 
-				cpuGeom_.verts.push_back(phiIncremented);
-				cpuGeom_.verts.push_back(currentPoint);
-				cpuGeom_.verts.push_back(thetaIncremented);
+				cpuGeom_.verts.push_back(applyAxialRotation(phiIncremented));
+				cpuGeom_.verts.push_back(applyAxialRotation(currentPoint));
+				cpuGeom_.verts.push_back(applyAxialRotation(thetaIncremented));
 
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta, phi + step));
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta, phi));
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta + step, phi));
 
-				cpuGeom_.verts.push_back(bothIncremented);
-				cpuGeom_.verts.push_back(phiIncremented);
-				cpuGeom_.verts.push_back(thetaIncremented);
+				cpuGeom_.verts.push_back(applyAxialRotation(bothIncremented));
+				cpuGeom_.verts.push_back(applyAxialRotation(phiIncremented));
+				cpuGeom_.verts.push_back(applyAxialRotation(thetaIncremented));
 
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta + step, phi + step));
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta, phi + step));
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta + step, phi));
 
 				std::vector<glm::vec3> adjacents = { phiIncremented, phiIncrementedThetaDecremented, thetaDecremented, phiDecremented, thetaIncrementedPhiDecremented, thetaIncremented };
-				cpuGeom_.normals.push_back(generatePerVertexNormal(phiIncremented, sphereTranslation, invertNormals));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(currentPoint, sphereTranslation, invertNormals));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(thetaIncremented, sphereTranslation, invertNormals));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(bothIncremented, sphereTranslation, invertNormals));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(phiIncremented, sphereTranslation, invertNormals));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(thetaIncremented, sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(phiIncremented), sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(currentPoint), sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(thetaIncremented), sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(bothIncremented), sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(phiIncremented), sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(thetaIncremented), sphereTranslation, invertNormals));
 			}
 		}
 	}
@@ -187,13 +213,17 @@ private:
 	float size_;
 	const Planet const* parent_;
 	float distanceFromParent_;
-	float rotationAngle_;
+	float orbitalRotationAngle_;
+	float axialRotationAngle_;
 	float orbitalInclination_;
-	float rotationIncrement_;
+	float axialTilt_;
+	float orbitalRotationIncrement_;
+	glm::vec3 axisOfRotation_;
 	Texture texture_;
 	CPU_Geometry cpuGeom_;
 	GPU_Geometry gpuGeom_;
 	bool invertNormals_;
+	glm::mat4 axialRotationMatrix_;
 };
 
 // EXAMPLE CALLBACKS
@@ -280,13 +310,13 @@ int main() {
 	Planet sun(sunSize, "textures/sunmap.jpg");
 	sun.generateGeometry(false);
 
-	Planet earth(earthSize, "textures/earthmap1k.jpg", &sun, earthToSun, earthOrbitalInclination, earthRotationIncrement);
+	Planet earth(earthSize, "textures/earthmap1k.jpg", &sun, earthToSun, earthOrbitalInclination, earthAxialTilt, earthOrbitalRotationIncrement);
 	earth.generateGeometry(false);
 
 	//Source didn't have a moon texture map, so using pluto texture map for moon
 	//Also scaling up the size of the moon and the distance to earth these values are so small relative
 	//to the size of the sun
-	Planet moon(moonSize * 2, "textures/plutomap1k.jpg", &earth, moonToEarth * 10, moonOrbitalInclination, moonRotationIncrement);
+	Planet moon(moonSize * 2, "textures/plutomap1k.jpg", &earth, moonToEarth * 10, moonOrbitalInclination, moonAxialTilt, moonOrbitalRotationIncrement);
 	moon.generateGeometry(false);
 
 	Planet starBackdrop((sunSize / 0.3f) * 20, "textures/starfield.jpg");
@@ -311,9 +341,11 @@ int main() {
 
 		sun.draw();
 		earth.draw();
-		earth.rotate();
+		earth.orbitalRotation();
+		earth.axialRotation();
 		moon.draw();
-		moon.rotate();
+		moon.orbitalRotation();
+		moon.axialRotation();
 		starBackdrop.draw();
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
