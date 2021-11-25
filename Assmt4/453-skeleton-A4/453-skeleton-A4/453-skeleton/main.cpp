@@ -74,12 +74,11 @@ public:
 		translationMatrix_ = translationMatrix();
 	}
 
-	/*void axialRotation()
+	void axialRotation()
 	{
 		axialRotationAngle_ += axialRotationIncrement;
 		axialRotationMatrix_ = glm::rotate(glm::mat4(1.0), axialRotationAngle_, axisOfRotation_);
-		generateGeometry(invertNormals_);
-	}*/
+	}
 
 	void orbitalRotation()
 	{
@@ -106,6 +105,8 @@ public:
 		texture_.bind();
 		GLint transformationMatrixShaderVariable = glGetUniformLocation(shader, "transformationMatrix");
 		glUniformMatrix4fv(transformationMatrixShaderVariable, 1, GL_FALSE, &translationMatrix_[0][0]);
+		GLint rotationMatrixShaderVariable = glGetUniformLocation(shader, "rotationMatrix");
+		glUniformMatrix4fv(rotationMatrixShaderVariable, 1, GL_FALSE, &axialRotationMatrix_[0][0]);
 		glDrawArrays(GL_TRIANGLES, 0, GLsizei(cpuGeom_.verts.size()));
 		texture_.unbind();
 	}
@@ -169,14 +170,6 @@ private:
 	{
 		return glm::vec2(theta / (2 * PI), phi / PI);
 	}
-
-	/*glm::vec3 applyAxialRotation(glm::vec3 point)
-	{
-		point = point - location();
-		point = glm::vec3(axialRotationMatrix_ * glm::vec4(point, 1.0f));
-		point = point + location();
-		return point;
-	}*/
 
 	void generateSphere(float radius, float step, bool invertNormals)
 	{
@@ -362,10 +355,10 @@ int main() {
 		sun.draw(shader);
 		earth.draw(shader);
 		earth.orbitalRotation();
-		//earth.axialRotation();
+		earth.axialRotation();
 		moon.draw(shader);
 		moon.orbitalRotation();
-		//moon.axialRotation();
+		moon.axialRotation();
 		starBackdrop.draw(shader);
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui

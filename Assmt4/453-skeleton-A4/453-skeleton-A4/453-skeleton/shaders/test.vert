@@ -7,6 +7,7 @@ uniform mat4 M;
 uniform mat4 V;
 uniform mat4 P;
 uniform mat4 transformationMatrix;
+uniform mat4 rotationMatrix;
 
 out vec3 fragPos;
 out vec2 tc;
@@ -15,6 +16,6 @@ out vec3 n;
 void main() {
 	fragPos = pos;
 	tc = texCoord;
-	n = normal;
-	gl_Position = P * V * M * transformationMatrix * vec4(pos, 1.0);
+	n = vec3(rotationMatrix * vec4(normal, 1.0));
+	gl_Position = P * V * M * transformationMatrix * rotationMatrix * vec4(pos, 1.0);
 }
