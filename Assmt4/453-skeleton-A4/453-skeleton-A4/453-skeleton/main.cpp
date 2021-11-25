@@ -34,9 +34,9 @@ const float earthOrbitalInclination = 0.4101524f;
 const float earthAxialTilt = 0.4101524f;
 const float moonOrbitalInclination = 0.08979719f;
 const float moonAxialTilt = 0.0261799f;
-const float earthOrbitalRotationIncrement = 0.05f;
-const float moonOrbitalRotationIncrement = 0.1f;
-const float axialRotationIncrement = 0.05f;
+const float earthOrbitalRotationIncrement = 0.001f;
+const float moonOrbitalRotationIncrement = 0.01f;
+const float axialRotationIncrement = 0.01f;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry& gpuGeom, CPU_Geometry const& cpuGeom) {
@@ -70,42 +70,56 @@ public:
 
 		float axialAngle = orbitalInclination_ + PI / 2 + axialTilt_;
 		axisOfRotation_ = glm::vec3(glm::rotate(glm::mat4(1.0f), axialAngle, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
+		updateLocation();
+		translationMatrix_ = translationMatrix();
 	}
 
-	void axialRotation()
+	/*void axialRotation()
 	{
 		axialRotationAngle_ += axialRotationIncrement;
 		axialRotationMatrix_ = glm::rotate(glm::mat4(1.0), axialRotationAngle_, axisOfRotation_);
 		generateGeometry(invertNormals_);
-	}
+	}*/
 
 	void orbitalRotation()
 	{
 		orbitalRotationAngle_ += orbitalRotationIncrement_;
-		generateGeometry(invertNormals_);
+		updateLocation();
+		translationMatrix_ = translationMatrix();
 	}
 
 	void generateGeometry(bool invertNormals)
 	{
 		invertNormals_ = invertNormals;
-		generateSphere(size_, sphereParameterStep, location(), invertNormals);
+		generateSphere(size_, sphereParameterStep, invertNormals);
 		updateGeometry();
 	}
 
 	glm::vec3 location() const
 	{
+		return location_;
+	}
+
+	void draw(ShaderProgram& shader)
+	{
+		gpuGeom_.bind();
+		texture_.bind();
+		GLint transformationMatrixShaderVariable = glGetUniformLocation(shader, "transformationMatrix");
+		glUniformMatrix4fv(transformationMatrixShaderVariable, 1, GL_FALSE, &translationMatrix_[0][0]);
+		glDrawArrays(GL_TRIANGLES, 0, GLsizei(cpuGeom_.verts.size()));
+		texture_.unbind();
+	}
+
+private:
+	glm::mat4 translationMatrix() const
+	{
 		if (parent_ != NULL)
 		{
-			glm::vec3 positionRelativeToParent = {
-				distanceFromParent_* sin(orbitalRotationAngle_),
-				distanceFromParent_ * sin(orbitalInclination_) * sin(orbitalRotationAngle_),
-				distanceFromParent_ * cos(orbitalRotationAngle_) };
-
-			return positionRelativeToParent + parent_->location();
+			return glm::translate(glm::mat4(1.0f), location_);
 		}
 		else
 		{
-			return glm::vec3(0.0f, 0.0f, 0.0f);
+			return glm::mat4(1.0f);
 		}
 	}
 
@@ -114,22 +128,26 @@ public:
 		updateGPUGeometry(gpuGeom_, cpuGeom_);
 	}
 
-	void draw()
+	void updateLocation()
 	{
-		gpuGeom_.bind();
-		texture_.bind();
-		glDrawArrays(GL_TRIANGLES, 0, GLsizei(cpuGeom_.verts.size()));
-		texture_.unbind();
+		if (parent_ != NULL)
+		{
+			glm::vec3 positionRelativeToParent = {
+				distanceFromParent_ * sin(orbitalRotationAngle_),
+				distanceFromParent_ * sin(orbitalInclination_) * sin(orbitalRotationAngle_),
+				distanceFromParent_ * cos(orbitalRotationAngle_)
+			};
+			location_ = parent_->location() + positionRelativeToParent;
+		}
+		else
+		{
+			location_ = glm::vec3(0.0f, 0.0f, 0.0f);
+		}
 	}
 
-	float actualSize()
+	glm::vec3 generatePerVertexNormal(glm::vec3 vertex, bool invertNormals)
 	{
-		return (size_ / sunDisplaySize) * sunSize;
-	}
-
-private:
-	glm::vec3 generatePerVertexNormal(glm::vec3 vertex, glm::vec3 sphereCentre, bool invertNormals)
-	{
+		glm::vec3 sphereCentre = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 normalVector;
 		if (invertNormals)
 		{
@@ -152,15 +170,15 @@ private:
 		return glm::vec2(theta / (2 * PI), phi / PI);
 	}
 
-	glm::vec3 applyAxialRotation(glm::vec3 point)
+	/*glm::vec3 applyAxialRotation(glm::vec3 point)
 	{
 		point = point - location();
 		point = glm::vec3(axialRotationMatrix_ * glm::vec4(point, 1.0f));
 		point = point + location();
 		return point;
-	}
+	}*/
 
-	void generateSphere(float radius, float step, glm::vec3 sphereTranslation, bool invertNormals)
+	void generateSphere(float radius, float step, bool invertNormals)
 	{
 		cpuGeom_.verts.clear();
 		cpuGeom_.normals.clear();
@@ -169,42 +187,42 @@ private:
 		{
 			for (float phi = 0.0f; phi <= PI; phi += step)
 			{
-				glm::vec3 currentPoint = findSphericalCoordinate(radius, theta, phi) + sphereTranslation;
+				glm::vec3 currentPoint = findSphericalCoordinate(radius, theta, phi);
 
-				glm::vec3 phiIncremented = findSphericalCoordinate(radius, theta, phi + step) + sphereTranslation;
-				glm::vec3 phiDecremented = findSphericalCoordinate(radius, theta, phi - step) + sphereTranslation;
+				glm::vec3 phiIncremented = findSphericalCoordinate(radius, theta, phi + step);
+				glm::vec3 phiDecremented = findSphericalCoordinate(radius, theta, phi - step);
 
-				glm::vec3 thetaIncremented = findSphericalCoordinate(radius, theta + step, phi) + sphereTranslation;
-				glm::vec3 thetaDecremented = findSphericalCoordinate(radius, theta - step, phi) + sphereTranslation;
+				glm::vec3 thetaIncremented = findSphericalCoordinate(radius, theta + step, phi);
+				glm::vec3 thetaDecremented = findSphericalCoordinate(radius, theta - step, phi);
 
-				glm::vec3 phiIncrementedThetaDecremented = findSphericalCoordinate(radius, theta - step, phi + step) + sphereTranslation;
-				glm::vec3 thetaIncrementedPhiDecremented = findSphericalCoordinate(radius, theta + step, phi - step) + sphereTranslation;
+				glm::vec3 phiIncrementedThetaDecremented = findSphericalCoordinate(radius, theta - step, phi + step);
+				glm::vec3 thetaIncrementedPhiDecremented = findSphericalCoordinate(radius, theta + step, phi - step);
 
-				glm::vec3 bothIncremented = findSphericalCoordinate(radius, theta + step, phi + step) + sphereTranslation;
+				glm::vec3 bothIncremented = findSphericalCoordinate(radius, theta + step, phi + step);
 
-				cpuGeom_.verts.push_back(applyAxialRotation(phiIncremented));
-				cpuGeom_.verts.push_back(applyAxialRotation(currentPoint));
-				cpuGeom_.verts.push_back(applyAxialRotation(thetaIncremented));
+				cpuGeom_.verts.push_back(phiIncremented);
+				cpuGeom_.verts.push_back(currentPoint);
+				cpuGeom_.verts.push_back(thetaIncremented);
 
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta, phi + step));
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta, phi));
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta + step, phi));
 
-				cpuGeom_.verts.push_back(applyAxialRotation(bothIncremented));
-				cpuGeom_.verts.push_back(applyAxialRotation(phiIncremented));
-				cpuGeom_.verts.push_back(applyAxialRotation(thetaIncremented));
+				cpuGeom_.verts.push_back(bothIncremented);
+				cpuGeom_.verts.push_back(phiIncremented);
+				cpuGeom_.verts.push_back(thetaIncremented);
 
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta + step, phi + step));
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta, phi + step));
 				cpuGeom_.texCoords.push_back(findTextureCoordinate(theta + step, phi));
 
 				std::vector<glm::vec3> adjacents = { phiIncremented, phiIncrementedThetaDecremented, thetaDecremented, phiDecremented, thetaIncrementedPhiDecremented, thetaIncremented };
-				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(phiIncremented), sphereTranslation, invertNormals));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(currentPoint), sphereTranslation, invertNormals));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(thetaIncremented), sphereTranslation, invertNormals));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(bothIncremented), sphereTranslation, invertNormals));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(phiIncremented), sphereTranslation, invertNormals));
-				cpuGeom_.normals.push_back(generatePerVertexNormal(applyAxialRotation(thetaIncremented), sphereTranslation, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(phiIncremented, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(currentPoint, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(thetaIncremented, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(bothIncremented, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(phiIncremented, invertNormals));
+				cpuGeom_.normals.push_back(generatePerVertexNormal(thetaIncremented, invertNormals));
 			}
 		}
 	}
@@ -224,6 +242,8 @@ private:
 	GPU_Geometry gpuGeom_;
 	bool invertNormals_;
 	glm::mat4 axialRotationMatrix_;
+	glm::mat4 translationMatrix_;;
+	glm::vec3 location_;
 };
 
 // EXAMPLE CALLBACKS
@@ -339,14 +359,14 @@ int main() {
 
 		a4->viewPipeline(shader);
 
-		sun.draw();
-		earth.draw();
+		sun.draw(shader);
+		earth.draw(shader);
 		earth.orbitalRotation();
-		earth.axialRotation();
-		moon.draw();
+		//earth.axialRotation();
+		moon.draw(shader);
 		moon.orbitalRotation();
-		moon.axialRotation();
-		starBackdrop.draw();
+		//moon.axialRotation();
+		starBackdrop.draw(shader);
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
