@@ -89,6 +89,7 @@ public:
 		{
 			orbitalRotationAngle_ += *orbitalRotationIncrement_;
 			updateLocation();
+			updateNormals();
 			translationMatrix_ = translationMatrix();
 		}
 	}
@@ -152,9 +153,19 @@ private:
 		}
 	}
 
+	void updateNormals()
+	{
+		cpuGeom_.normals.clear();
+		for (glm::vec3 vertex : cpuGeom_.verts)
+		{
+			cpuGeom_.normals.push_back(generatePerVertexNormal(vertex, invertNormals_));
+		}
+		updateGeometry();
+	}
+
 	glm::vec3 generatePerVertexNormal(glm::vec3 vertex, bool invertNormals)
 	{
-		glm::vec3 sphereCentre = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 sphereCentre = location_;
 		glm::vec3 normalVector;
 		if (invertNormals)
 		{
@@ -335,7 +346,7 @@ public:
 		glm::mat4 P = glm::perspective(glm::radians(45.0f), aspect, 0.01f, 1000.f);
 
 		GLint location = glGetUniformLocation(sp, "light");
-		glm::vec3 light = camera.getPos();
+		glm::vec3 light = { 0.0f, 0.0f, 0.0f };
 		glUniform3fv(location, 1, glm::value_ptr(light));
 
 		GLint uniMat = glGetUniformLocation(sp, "M");
@@ -391,7 +402,7 @@ int main() {
 	moon.generateGeometry(false);
 
 	Planet starBackdrop((sunSize / 0.3f) * 20, "textures/starfield.jpg");
-	starBackdrop.generateGeometry(true);
+	starBackdrop.generateGeometry(false);
 
 	// RENDER LOOP
 	while (!window.shouldClose()) {
@@ -418,10 +429,10 @@ int main() {
 		if (animating)
 		{
 			earth.orbitalRotation();
-			earth.axialRotation();
+			//earth.axialRotation();
 
 			moon.orbitalRotation();
-			moon.axialRotation();
+			//moon.axialRotation();
 		}
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui

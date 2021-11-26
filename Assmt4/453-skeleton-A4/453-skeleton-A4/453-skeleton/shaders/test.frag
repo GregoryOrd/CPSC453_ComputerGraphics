@@ -11,7 +11,7 @@ out vec4 color;
 
 void main() {
 	vec4 d = texture(sampler, tc);
-	vec3 lightDir = normalize(light - fragPos);
+	vec3 lightDir = normalize(fragPos - light);
     vec3 normal = normalize(n);
     float diff = max(dot(lightDir, normal), 0.0);
 	color = diff * d;

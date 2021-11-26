@@ -16,6 +16,6 @@ out vec3 n;
 void main() {
 	fragPos = pos;
 	tc = texCoord;
-	n = vec3(rotationMatrix * vec4(normal, 1.0));
+	n = normal;
 	gl_Position = P * V * M * transformationMatrix * rotationMatrix * vec4(pos, 1.0);
 }
