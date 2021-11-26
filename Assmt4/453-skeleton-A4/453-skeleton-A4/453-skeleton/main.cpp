@@ -34,7 +34,7 @@ const float earthOrbitalInclination = 0.4101524f;
 const float earthAxialTilt = 0.4101524f;
 const float moonOrbitalInclination = 0.08979719f;
 const float moonAxialTilt = 0.0261799f;
-const float axialRotationIncrement = 0.01f;
+float axialRotationIncrement = 0.01f;
 bool animating = true;
 
 // We gave this code in one of the tutorials, so leaving it here too
@@ -279,6 +279,21 @@ public:
 
 			*earthOrbitalRotationIncrement_ = newEarthOrbitalRotationIncrement;
 			*moonOrbitalRotationIncrement_ = newMoonOrbitalRotationIncrement;
+		}
+		else if (key == GLFW_KEY_RIGHT && GLFW_PRESS && animating)
+		{
+			axialRotationIncrement += 0.01f;
+		}
+		else if (key == GLFW_KEY_LEFT && GLFW_PRESS && animating)
+		{
+			float newAxialRotationIncrement = axialRotationIncrement - 0.01f;
+
+			if (newAxialRotationIncrement < 0.0f)
+			{
+				newAxialRotationIncrement = 0.0f;
+			}
+
+			axialRotationIncrement = newAxialRotationIncrement;
 		}
 	}
 
