@@ -34,8 +34,6 @@ const float earthOrbitalInclination = 0.4101524f;
 const float earthAxialTilt = 0.4101524f;
 const float moonOrbitalInclination = 0.08979719f;
 const float moonAxialTilt = 0.0261799f;
-const float earthOrbitalRotationIncrement = 0.001f;
-const float moonOrbitalRotationIncrement = 0.01f;
 const float axialRotationIncrement = 0.01f;
 bool animating = true;
 
@@ -50,7 +48,7 @@ void updateGPUGeometry(GPU_Geometry& gpuGeom, CPU_Geometry const& cpuGeom) {
 class Planet //Includes sun and moon 
 {
 public:
-	Planet(float actualSize, const char* texturePath, Planet* parent = NULL, float actualDistanceFromParent = 0.0f, float orbitalInclination = 0.0f, float axialTilt = 0.0f, float orbitalRotationIncrement = 0.0f)
+	Planet(float actualSize, const char* texturePath, Planet* parent = NULL, float actualDistanceFromParent = 0.0f, float orbitalInclination = 0.0f, float axialTilt = 0.0f, float* orbitalRotationIncrement = NULL)
 		: size_((actualSize / sunSize)* sunDisplaySize)
 		, distanceFromParent_((actualDistanceFromParent / sunSize)* sunDisplaySize / 100)
 		, orbitalInclination_(orbitalInclination)
@@ -83,9 +81,12 @@ public:
 
 	void orbitalRotation()
 	{
-		orbitalRotationAngle_ += orbitalRotationIncrement_;
-		updateLocation();
-		translationMatrix_ = translationMatrix();
+		if (orbitalRotationIncrement_ != NULL)
+		{
+			orbitalRotationAngle_ += *orbitalRotationIncrement_;
+			updateLocation();
+			translationMatrix_ = translationMatrix();
+		}
 	}
 
 	void generateGeometry(bool invertNormals)
@@ -229,7 +230,7 @@ private:
 	float axialRotationAngle_;
 	float orbitalInclination_;
 	float axialTilt_;
-	float orbitalRotationIncrement_;
+	float* orbitalRotationIncrement_;
 	glm::vec3 axisOfRotation_;
 	Texture texture_;
 	CPU_Geometry cpuGeom_;
@@ -244,12 +245,40 @@ private:
 class Assignment4 : public CallbackInterface {
 
 public:
-	Assignment4() : camera(0.0, 0.0, 2.0), aspect(1.0f) {}
+	Assignment4(float* earthOrbitalRotationIncrement, float* moonOrbitalRotationIncrement)
+		: camera(0.0, 0.0, 2.0)
+		, aspect(1.0f)
+		, earthOrbitalRotationIncrement_(earthOrbitalRotationIncrement)
+		, moonOrbitalRotationIncrement_(moonOrbitalRotationIncrement)
+	{}
 
 	virtual void keyCallback(int key, int scancode, int action, int mods) {
 		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
 		{
 			animating = !animating;
+		}
+		else if (key == GLFW_KEY_UP && action == GLFW_PRESS && animating)
+		{
+			*earthOrbitalRotationIncrement_ += 0.001f;
+			*moonOrbitalRotationIncrement_ += 0.01f;
+		}
+		else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS && animating)
+		{
+			float newEarthOrbitalRotationIncrement = *earthOrbitalRotationIncrement_ - 0.001f;
+			float newMoonOrbitalRotationIncrement = *moonOrbitalRotationIncrement_ - 0.01f;
+
+			if (newEarthOrbitalRotationIncrement < 0.0f)
+			{
+				newEarthOrbitalRotationIncrement = 0.0f;
+			}
+
+			if (newMoonOrbitalRotationIncrement < 0.0f)
+			{
+				newMoonOrbitalRotationIncrement = 0.0f;
+			}
+
+			*earthOrbitalRotationIncrement_ = newEarthOrbitalRotationIncrement;
+			*moonOrbitalRotationIncrement_ = newMoonOrbitalRotationIncrement;
 		}
 	}
 
@@ -306,6 +335,8 @@ private:
 	float aspect;
 	double mouseOldX;
 	double mouseOldY;
+	float* earthOrbitalRotationIncrement_;
+	float* moonOrbitalRotationIncrement_;
 
 };
 
@@ -319,23 +350,25 @@ int main() {
 
 	GLDebug::enable();
 
-	// CALLBACKS
-	auto a4 = std::make_shared<Assignment4>();
-	window.setCallbacks(a4);
+	float earthOrbitalRotationIncrement = 0.001f;
+	float moonOrbitalRotationIncrement = 0.01f;
 
+	// CALLBACKS
+	auto a4 = std::make_shared<Assignment4>(&earthOrbitalRotationIncrement, &moonOrbitalRotationIncrement);
+	window.setCallbacks(a4);
 
 	ShaderProgram shader("shaders/test.vert", "shaders/test.frag");
 
 	Planet sun(sunSize, "textures/sunmap.jpg");
 	sun.generateGeometry(false);
 
-	Planet earth(earthSize, "textures/earthmap1k.jpg", &sun, earthToSun, earthOrbitalInclination, earthAxialTilt, earthOrbitalRotationIncrement);
+	Planet earth(earthSize, "textures/earthmap1k.jpg", &sun, earthToSun, earthOrbitalInclination, earthAxialTilt, &earthOrbitalRotationIncrement);
 	earth.generateGeometry(false);
 
 	//Source didn't have a moon texture map, so using pluto texture map for moon
 	//Also scaling up the size of the moon and the distance to earth these values are so small relative
 	//to the size of the sun
-	Planet moon(moonSize * 2, "textures/plutomap1k.jpg", &earth, moonToEarth * 10, moonOrbitalInclination, moonAxialTilt, moonOrbitalRotationIncrement);
+	Planet moon(moonSize * 2, "textures/plutomap1k.jpg", &earth, moonToEarth * 10, moonOrbitalInclination, moonAxialTilt, &moonOrbitalRotationIncrement);
 	moon.generateGeometry(false);
 
 	Planet starBackdrop((sunSize / 0.3f) * 20, "textures/starfield.jpg");
