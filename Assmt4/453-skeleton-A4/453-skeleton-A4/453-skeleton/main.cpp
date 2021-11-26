@@ -65,6 +65,7 @@ public:
 		, axialTilt_(axialTilt)
 		, axisOfRotation_(PI/2)
 		, axialRotationMatrix_(1.0f)
+		, reverseAxialRotationMatrix_(1.0f)
 	{
 		if (parent_ != NULL)
 		{
@@ -81,6 +82,7 @@ public:
 	{
 		axialRotationAngle_ += axialRotationIncrement;
 		axialRotationMatrix_ = glm::rotate(glm::mat4(1.0), axialRotationAngle_, axisOfRotation_);
+		reverseAxialRotationMatrix_ = glm::rotate(glm::mat4(1.0), -axialRotationAngle_, axisOfRotation_);
 	}
 
 	void orbitalRotation()
@@ -158,7 +160,9 @@ private:
 		cpuGeom_.normals.clear();
 		for (glm::vec3 vertex : cpuGeom_.verts)
 		{
-			cpuGeom_.normals.push_back(generatePerVertexNormal(vertex, invertNormals_));
+			glm::vec3 normal = generatePerVertexNormal(vertex, invertNormals_);
+			normal = glm::vec3(reverseAxialRotationMatrix_ * glm::vec4(normal, 1.0f));
+			cpuGeom_.normals.push_back(normal);
 		}
 		updateGeometry();
 	}
@@ -252,6 +256,7 @@ private:
 	GPU_Geometry gpuGeom_;
 	bool invertNormals_;
 	glm::mat4 axialRotationMatrix_;
+	glm::mat4 reverseAxialRotationMatrix_;
 	glm::mat4 translationMatrix_;;
 	glm::vec3 location_;
 };
@@ -428,11 +433,11 @@ int main() {
 
 		if (animating)
 		{
+			earth.axialRotation();
 			earth.orbitalRotation();
-			//earth.axialRotation();
 
 			moon.orbitalRotation();
-			//moon.axialRotation();
+			moon.axialRotation();
 		}
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
