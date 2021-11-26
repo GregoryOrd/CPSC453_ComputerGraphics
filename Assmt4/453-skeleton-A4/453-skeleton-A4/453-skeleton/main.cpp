@@ -37,6 +37,7 @@ const float moonAxialTilt = 0.0261799f;
 const float earthOrbitalRotationIncrement = 0.001f;
 const float moonOrbitalRotationIncrement = 0.01f;
 const float axialRotationIncrement = 0.01f;
+bool animating = true;
 
 // We gave this code in one of the tutorials, so leaving it here too
 void updateGPUGeometry(GPU_Geometry& gpuGeom, CPU_Geometry const& cpuGeom) {
@@ -246,7 +247,12 @@ public:
 	Assignment4() : camera(0.0, 0.0, 2.0), aspect(1.0f) {}
 
 	virtual void keyCallback(int key, int scancode, int action, int mods) {
+		if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+		{
+			animating = !animating;
+		}
 	}
+
 	virtual void mouseButtonCallback(int button, int action, int mods) {
 		if (button == GLFW_MOUSE_BUTTON_RIGHT) {
 			if (action == GLFW_PRESS) {
@@ -354,12 +360,17 @@ int main() {
 
 		sun.draw(shader);
 		earth.draw(shader);
-		earth.orbitalRotation();
-		earth.axialRotation();
 		moon.draw(shader);
-		moon.orbitalRotation();
-		moon.axialRotation();
 		starBackdrop.draw(shader);
+
+		if (animating)
+		{
+			earth.orbitalRotation();
+			earth.axialRotation();
+
+			moon.orbitalRotation();
+			moon.axialRotation();
+		}
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
 
