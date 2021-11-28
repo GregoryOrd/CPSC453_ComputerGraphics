@@ -112,10 +112,16 @@ public:
 	{
 		gpuGeom_.bind();
 		texture_.bind();
+
 		GLint transformationMatrixShaderVariable = glGetUniformLocation(shader, "transformationMatrix");
 		glUniformMatrix4fv(transformationMatrixShaderVariable, 1, GL_FALSE, &translationMatrix_[0][0]);
+
 		GLint rotationMatrixShaderVariable = glGetUniformLocation(shader, "rotationMatrix");
 		glUniformMatrix4fv(rotationMatrixShaderVariable, 1, GL_FALSE, &axialRotationMatrix_[0][0]);
+
+		GLint reverseRotationMatrixShaderVariable = glGetUniformLocation(shader, "reverseRotationMatrix");
+		glUniformMatrix4fv(reverseRotationMatrixShaderVariable, 1, GL_FALSE, &reverseAxialRotationMatrix_[0][0]);
+
 		glDrawArrays(GL_TRIANGLES, 0, GLsizei(cpuGeom_.verts.size()));
 		texture_.unbind();
 	}
@@ -160,9 +166,7 @@ private:
 		cpuGeom_.normals.clear();
 		for (glm::vec3 vertex : cpuGeom_.verts)
 		{
-			glm::vec3 normal = generatePerVertexNormal(vertex, invertNormals_);
-			normal = glm::vec3(reverseAxialRotationMatrix_ * glm::vec4(normal, 1.0f));
-			cpuGeom_.normals.push_back(normal);
+			cpuGeom_.normals.push_back(generatePerVertexNormal(vertex, invertNormals_));
 		}
 		updateGeometry();
 	}
@@ -436,8 +440,8 @@ int main() {
 			earth.axialRotation();
 			earth.orbitalRotation();
 
-			moon.orbitalRotation();
 			moon.axialRotation();
+			moon.orbitalRotation();
 		}
 
 		glDisable(GL_FRAMEBUFFER_SRGB); // disable sRGB for things like imgui
