@@ -114,8 +114,8 @@ void ImageBuffer::SetPixel(int x, int y, vec3 colour)
 
     // mark that something was changed
     m_modified = true;
-    m_modifiedLower = std::min(m_modifiedLower, y);
-    m_modifiedUpper = std::max(m_modifiedUpper, y+1);
+    m_modifiedLower = glm::min(m_modifiedLower, y);
+    m_modifiedUpper = glm::max(m_modifiedUpper, y+1);
 }
 
 // --------------------------------------------------------------------------

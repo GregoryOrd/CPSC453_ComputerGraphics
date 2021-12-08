@@ -103,18 +103,16 @@ std::vector<RayAndPixel> getRaysForViewpoint(Scene const &scene, ImageBuffer &im
 	int y = 0;
 	std::vector<RayAndPixel> rays;
 
-	// TODO: Part 1: Currently this is casting rays in an orthographic style.
-	//               You need to change this code to project them in a pinhole camera style.
-	for (float i = -1; x < image.Width(); x++) {
+	for (float i = -0.5; x < image.Width(); x++) {
 		y = 0;
-		for (float j = -1; y < image.Height(); y++) {
-			glm::vec3 direction(0, 0, -1);
-			glm::vec3 viewPointOrthographic(i-viewPoint.x, j-viewPoint.y, 0);
+		for (float j = -0.5; y < image.Height(); y++) {
+			glm::vec3 direction = glm::normalize(glm::vec3(i - viewPoint.x, j - viewPoint.y, -1));
+			glm::vec3 viewPointOrthographic(viewPoint.x, viewPoint.y, 0);
 			Ray r = Ray(viewPointOrthographic, direction);
 			rays.push_back({r, x, y});
-			j += 2.f / image.Height();
+			j += 1.f / image.Height();
 		}
-		i += 2.f / image.Width();
+		i += 1.f / image.Width();
 	}
 	return rays;
 }
