@@ -25,21 +25,38 @@ Intersection Sphere::getIntersection(Ray ray){
 	i.id = id;
 	i.material = material;
 
-	// You are required to implement this intersection.
-	//
-	// NOTE: You _must_ set these values appropriately for each case:
-	//
-	// No Intersection:
-	// i.numberOfIntersections = 0;
-	//
-	// Intersection:
-	// i.normal = **the normal at the point of intersection **
-	// i.point = **the point of intersection**
-	// i.numberOfIntersections = 1; // for a single intersection
-	//
-	// If you get fancy and implement things like refraction, you may actually
-	// want to track more than one intersection. You'll need to change
-	// The intersection struct in that case.
+	glm::vec3 sphereOffset = centre - ray.origin;
+	float delta = (pow(glm::dot(ray.direction, sphereOffset), 2) - pow(glm::length(sphereOffset), 2) + pow(radius, 2))/pow(glm::length(ray.direction), 2);
+
+	if (delta < 0)
+	{
+		i.numberOfIntersections = 0;
+		i.normal = { 0.0f, 0.0f, 0.0f };
+		i.point = { 0.0f, 0.0f, 0.0f };
+	}
+	else if (delta == 0)
+	{
+		float parameter = -1 * glm::dot(ray.direction, sphereOffset);
+
+		i.numberOfIntersections = 1;
+		i.point = parameter * ray.direction + ray.origin;
+		i.normal = i.point - centre;
+	}
+	else if (delta > 0)
+	{
+		float parameterOne = 1 * glm::dot(ray.direction, sphereOffset) + sqrt(delta);
+		float parameterTwo = 1 * glm::dot(ray.direction, sphereOffset) - sqrt(delta);
+
+		float parameterToUse = parameterOne;
+		if (abs(parameterTwo) < abs(parameterOne))
+		{
+			parameterToUse = parameterTwo;
+		}
+
+		i.numberOfIntersections = 1;
+		i.point = parameterToUse * ray.direction + ray.origin;
+		i.normal =  i.point - centre ;
+	}
 	return i;
 }
 
