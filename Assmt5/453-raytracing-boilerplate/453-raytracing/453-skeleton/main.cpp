@@ -25,6 +25,7 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+int sceneNumber = 1;
 
 int hasIntersection(Scene const &scene, Ray ray, int skipID){
 	for (auto &shape : scene.shapesInScene) {
@@ -81,6 +82,23 @@ glm::vec3 raytraceSingleRay(Scene const &scene, Ray const &ray, int level, int s
 
 	if (level < 1) {
 		phong.material.reflectionStrength = glm::vec3(0);
+	}
+
+	Ray shadowRay(result.point, scene.lightPosition - result.point);
+	Intersection shadowResult = getClosestIntersection(scene, shadowRay, result.id);
+	if (sceneNumber == 1)
+	{
+		if (shadowResult.numberOfIntersections > 0 && shadowResult.id < 3)
+		{
+			return phong.Ia();
+		}
+	}
+	else
+	{
+		if (shadowResult.numberOfIntersections > 0 && shadowResult.id < 7)
+		{
+			return phong.Ia();
+		}
 	}
 
 
@@ -158,11 +176,13 @@ public:
 
 		if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
 			scene = initScene1();
+			sceneNumber = 1;
 			raytraceImage(scene, outputImage, viewPoint);
 		}
 
 		if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
 			scene = initScene2();
+			sceneNumber = 2;
 			raytraceImage(scene, outputImage, viewPoint);
 		}
 	}

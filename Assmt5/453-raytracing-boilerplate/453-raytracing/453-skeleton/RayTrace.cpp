@@ -36,7 +36,7 @@ Intersection Sphere::getIntersection(Ray ray){
 	}
 	else if (delta == 0)
 	{
-		float parameter = -1 * glm::dot(ray.direction, sphereOffset);
+		float parameter = 1 * glm::dot(ray.direction, sphereOffset);
 
 		i.numberOfIntersections = 1;
 		i.point = parameter * ray.direction + ray.origin;
